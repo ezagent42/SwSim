@@ -1,0 +1,318 @@
+# 001 — Socialware 架构总览
+
+> **状态**：Draft v1
+> **日期**：2026-03-09
+> **作者**：Allen & Claude collaborative design
+
+---
+
+## 1. 核心洞察
+
+**Socialware = 组织约束的 IM 协议。**
+
+同样的人 + 不同的组织（不同的 Role / Flow / Commitment / Arena）= 不同的 App。
+
+Socialware 将「组织」从隐性的社会契约变为显性的可执行文件。改变组织结构就是改变 App 的行为——不需要写一行代码。一份 `.socialware.md` 文件就是一个完整的组织定义；绑定身份和工具后，它就是一个可运行的 App。
+
+---
+
+## 2. 四原语
+
+| Primitive | 图论类比 | 定义 | 说明 |
+|-----------|---------|------|------|
+| **Role** | Graph node type | 组织中的**位置**（不是人），附带 capabilities | 一个 Role 可以由人或 AI 担任；holder 是可替换的 |
+| **Flow** | Directed edge + transition rules | **状态机**，定义 action 如何推进状态 | 每个 action 需要特定 Role 和 capability 才能执行 |
+| **Commitment** | Constraint on edges | 角色间的**可追踪义务** | 触发条件 + 截止时间 + 义务内容 |
+| **Arena** | Subgraph / boundary | **准入边界**，定义谁可以进入这个组织 | 控制 membership：role-based / anyone / invite_only |
+
+四原语的关系：
+
+```
+Arena（边界）
+  ├── Role（节点）── 定义参与者的位置和能力
+  ├── Flow（边 + 转换规则）── 定义工作流的状态转换
+  └── Commitment（边上的约束）── 定义角色间的契约承诺
+```
+
+---
+
+## 3. 三层开发模型
+
+### 3.1 Socialware Dev — 设计契约模板
+
+- **输入**：组织需求描述（自然语言）
+- **输出**：`.socialware.md` 模板文件
+- **工作**：定义四原语（Role / Flow / Commitment / Arena），所有 binding 为 `_待绑定_`
+- **存储**：`simulation/contracts/`
+- **性质**：模板是只读产品，可分发、可复用
+
+### 3.2 Socialware App Dev — 绑定契约
+
+- **输入**：模板 + 目标 Room
+- **输出**：`.app.md` 绑定文件 + workspace 配置
+- **工作**：复制模板 → 绑定 Identity 到 Role → 绑定 Tool 到 Action → 填写跨契约引用
+- **存储**：`workspace/rooms/{name}/contracts/{ns}.app.md`
+- **性质**：App 是模板的具体实例
+
+### 3.3 Socialware App Runtime — 文字游戏执行
+
+- **输入**：已安装的 App + 身份
+- **输出**：Timeline entries（append-only JSONL）
+- **工作**：自然语言 → 解析 action → Hook Pipeline → 消息持久化
+- **性质**：Timeline 是唯一真相源，State 纯推导
+
+```
+Socialware Dev          Socialware App Dev           Socialware App Runtime
+─────────────          ──────────────────           ──────────────────────
+Design org graph        Bind context                 Execute by contract
+│                      │                            │
+│  .socialware.md      │  .app.md + workspace       │  Timeline grows
+│  (template)          │  (bound + room)            │  State derives
+▼                      ▼                            ▼
+simulation/contracts/  workspace/rooms/{name}/       timeline/*.jsonl
+```
+
+---
+
+## 4. Room 模型
+
+**Room 是协作空间，不是 App。**
+
+Room 类似 Discord server——一个 Room 可以承载多个 Socialware，每个 Socialware 作为一个 namespace 提供命令集。App = 已安装的 Socialware 提供的命令。
+
+```
+Room "alpha"
+├── contracts/
+│   ├── ta.app.md        (namespace: ta)    → /ta.submit, /ta.approve
+│   ├── ew.app.md        (namespace: ew)    → /ew.create_branch, /ew.merge
+│   └── rp.app.md        (namespace: rp)    → /rp.request, /rp.allocate
+├── config.json          (Room 配置 + 所有 namespace 注册)
+├── state.json           (合并所有 namespace 的状态)
+├── timeline/            (所有 App 共享的 append-only 时间线)
+├── content/             (Content Objects)
+└── artifacts/           (工具副产物)
+```
+
+**关键区分**：
+- Room = 容器（space）
+- Socialware = 组织定义（contract）
+- App = 安装在 Room 中的 Socialware 实例（bound contract + runtime）
+- Namespace = App 在 Room 中的命名空间前缀
+
+---
+
+## 5. Multi-Namespace 模型
+
+多个 Socialware 安装在同一个 Room 中，每个拥有一个 namespace 前缀：
+
+| Namespace | Socialware | 命令示例 |
+|-----------|-----------|---------|
+| `ew` | EventWeaver（代码协作） | `ew:create_branch`, `ew:merge` |
+| `ta` | TaskArena（任务管理） | `ta:submit`, `ta:approve` |
+| `rp` | ResPool（资源管理） | `rp:request`, `rp:allocate` |
+
+### 5.1 状态共存
+
+所有 namespace 的 flow_states 共存于同一个 `state.json`：
+
+```json
+{
+  "flow_states": {
+    "ew:branch_lifecycle:feature-auth": { "current": "open", "subject_author": "@alice:local" },
+    "ta:task_lifecycle:task-001": { "current": "submitted", "subject_author": "@bob:local" },
+    "rp:resource_lifecycle:gpu-01": { "current": "allocated", "subject_author": "@alice:local" }
+  }
+}
+```
+
+### 5.2 跨 Namespace 引用
+
+跨 namespace 交互 = 查询同一个 `state.json`，使用不同的 namespace 前缀：
+
+```
+ew:merge.execute 需要检查 ta:task_lifecycle 的状态
+→ 读取 state.json 中 "ta:task_lifecycle:*" 的条目
+→ 无需跨 Room 文件读取，全在同一个 state.json 中
+```
+
+---
+
+## 6. Hook Pipeline
+
+每条消息经过三阶段 Hook Pipeline：
+
+```
+用户输入（自然语言 / 命令）
+        │
+        ▼
+┌─────────────────────────────────────────────┐
+│  Phase 1: pre_send                          │
+│                                             │
+│  ① Role Check — 发送者是否持有所需 Role      │
+│  ② CBAC Check — Capability-Based Access     │
+│     · any: 任何持有 required_role 的人       │
+│     · author: 仅 flow instance 创建者        │
+│     · author | role:{R}: 创建者 OR 管理角色   │
+│  ③ Flow Check — 当前状态是否允许此 action     │
+│  ④ Cross-Namespace Check — 跨 namespace 依赖 │
+│                                             │
+│  任一检查失败 → 拒绝，返回错误消息             │
+└─────────────────┬───────────────────────────┘
+                  │ 通过
+                  ▼
+┌─────────────────────────────────────────────┐
+│  Phase 2: execute                           │
+│                                             │
+│  ① 运行绑定的 Tool（bash / mcp / api / llm）│
+│  ② 捕获 Tool 输出                           │
+│  ③ 生成 Content Object                      │
+│  ④ 存储 Artifacts（如有副产物）              │
+└─────────────────┬───────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────┐
+│  Phase 3: after_write                       │
+│                                             │
+│  ① Append Ref to Timeline（JSONL）          │
+│  ② Update State（flow_states, commitments） │
+│  ③ Broadcast（通知其他 peer / namespace）    │
+└─────────────────────────────────────────────┘
+```
+
+---
+
+## 7. CRDT / Timeline as Truth
+
+### 7.1 核心原则
+
+- **Timeline 是唯一真相源**：消息以 append-only JSONL 格式持久化
+- **State 是纯函数推导**：`State = f(Timeline)`
+- **可重建性**：删除 `state.json` → 从 Timeline 重放 → State 完全重建
+- **不可变性**：Timeline 条目一旦写入，永不修改或删除
+
+### 7.2 Lamport Clock
+
+每条 Timeline entry 携带 Lamport timestamp，用于因果排序：
+
+```
+Lamport Clock 规则：
+1. 发送消息前：local_clock += 1，附加 clock 值
+2. 接收消息时：local_clock = max(local_clock, received_clock) + 1
+3. 因果关系：if msg_a.clock < msg_b.clock, then a happened-before b
+4. 并发消息：clock 相同时，用 peer_id 字典序打破平局
+```
+
+### 7.3 数据流
+
+```
+写操作                          读操作
+────────                        ────────
+用户 action                     查询 state.json
+    │                               │
+    ▼                               ▼
+Hook Pipeline                   State Cache
+    │                           (pure-derived)
+    ▼
+Timeline (append JSONL)
+    │
+    ▼
+State Update (derive)
+```
+
+---
+
+## 8. P2P 模拟模型
+
+SwSim 使用共享文件系统模拟 P2P 网络：
+
+### 8.1 Multi-Session 模式（推荐）
+
+每个 Claude Code session = 一个 peer identity。多个 session 共享 `simulation/workspace/` 文件系统。
+
+```
+Terminal A                    Terminal B
+──────────                    ──────────
+Claude Code session           Claude Code session
+Identity: @alice:local        Identity: @bob:local
+    │                             │
+    └──── 共享文件系统 ────────────┘
+          simulation/workspace/
+          └── rooms/alpha/
+              ├── timeline/    ← 两个 peer 都追加
+              └── state.json   ← 两个 peer 都读写
+```
+
+**文件系统 = P2P 网络**：
+- 文件写入 = 消息广播
+- 文件读取 = 消息接收
+- 文件锁 = 并发控制（OS 级别）
+
+### 8.2 Single-Session 模式（Fallback）
+
+单个 session 使用 `/switch @entity` 切换身份：
+
+```
+/switch @alice:local   → 以 Alice 身份操作
+/switch @bob:local     → 以 Bob 身份操作
+```
+
+切换时显示「收件箱」—— 自上次切换以来对方发送的消息。
+
+---
+
+## 9. 架构图
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        SwSim Architecture                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   Socialware Dev         App Dev              App Runtime       │
+│   ─────────────         ────────             ──────────────     │
+│   /socialware-dev       /socialware-app-dev  /socialware-app    │
+│        │                     │                    │             │
+│        ▼                     ▼                    ▼             │
+│   .socialware.md        .app.md              Hook Pipeline      │
+│   (template)            (bound)              ┌──────────────┐  │
+│                              │               │ pre_send     │  │
+│                              │               │ execute      │  │
+│                              │               │ after_write  │  │
+│                              │               └──────┬───────┘  │
+│                              │                      │          │
+│                              ▼                      ▼          │
+│                         Room (workspace)       Timeline (JSONL) │
+│                         ┌──────────────┐      ┌──────────────┐ │
+│                         │ config.json  │      │ append-only  │ │
+│                         │ contracts/   │      │ Lamport clk  │ │
+│                         │ state.json   │◄─────│ causal order │ │
+│                         │ content/     │      └──────────────┘ │
+│                         │ artifacts/   │                       │
+│                         └──────────────┘                       │
+│                                                                 │
+│   P2P Layer (Simulated)                                        │
+│   ─────────────────────                                        │
+│   Shared Filesystem = Zenoh P2P Network                        │
+│   Each Claude Code session = One Peer                          │
+│   /switch = Single-session fallback                            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 10. 术语表
+
+| 术语 | 定义 |
+|------|------|
+| Socialware | 契约文件（`.socialware.md`），用四原语定义组织 |
+| Socialware App | 绑定后的契约（`.app.md`）+ 运行时 workspace |
+| Room | 协作空间，可承载多个 Socialware |
+| Namespace | Socialware 在 Room 中的命名前缀（如 `ew`, `ta`） |
+| Timeline | Append-only JSONL，唯一真相源 |
+| State | 从 Timeline 纯推导的 JSON 缓存 |
+| Hook Pipeline | 消息处理三阶段管线：pre_send → execute → after_write |
+| CBAC | Capability-Based Access Control，基于能力的访问控制 |
+| Lamport Clock | 逻辑时钟，用于因果排序 |
+| Content Object | 消息的实际内容载体 |
+| Ref | Timeline 中的引用条目，指向 Content Object |
+| Artifact | Tool 执行的副产物，存储在 `artifacts/` |
