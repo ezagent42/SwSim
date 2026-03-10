@@ -127,25 +127,37 @@ Socialware Dev          App Dev              Room              Users
 
 ### Timeline（混合消息流）
 
-所有 namespace 的消息混合存储在同一 Timeline 中，通过 namespace 前缀区分：
+所有 namespace 的消息混合存储在同一 Timeline JSONL 文件中，通过 `ext.command.namespace` 区分：
 
-```json
-[
-  { "clock": 1, "ns": "ew", "type": "branch.created", "data": {...} },
-  { "clock": 2, "ns": "ta", "type": "task.submitted", "data": {...} },
-  { "clock": 3, "ns": "rp", "type": "resource.requested", "data": {...} },
-  { "clock": 4, "ns": "ew", "type": "merge.requested", "data": {...} }
-]
+```jsonl
+{"ref_id":"msg-001","author":"@alice:local","clock":1,"ext":{"command":{"namespace":"ew","action":"branch.create"},"reply_to":null},...}
+{"ref_id":"msg-002","author":"@alice:local","clock":2,"ext":{"command":{"namespace":"ta","action":"task.submit"},"reply_to":null},...}
+{"ref_id":"msg-003","author":"@bob:local","clock":3,"ext":{"command":{"namespace":"rp","action":"resource.request"},"reply_to":null},...}
+{"ref_id":"msg-004","author":"@alice:local","clock":4,"ext":{"command":{"namespace":"ew","action":"merge.request"},"reply_to":{"ref_id":"msg-001"}},...}
 ```
 
 ### State Cache（单一 state.json，多 namespace）
 
+key 为 subject Ref 的 `ref_id`，通过 `flow` 字段中的 namespace 前缀区分：
+
 ```json
 {
   "flow_states": {
-    "ew:branch_lifecycle:branch-001": "active",
-    "ta:task_lifecycle:task-001": "committed",
-    "rp:resource_lifecycle:res-001": "available"
+    "msg-001": {
+      "flow": "ew:branch_lifecycle",
+      "state": "active",
+      "subject_author": "@alice:local"
+    },
+    "msg-003": {
+      "flow": "ta:task_lifecycle",
+      "state": "committed",
+      "subject_author": "@alice:local"
+    },
+    "msg-005": {
+      "flow": "rp:resource_lifecycle",
+      "state": "available",
+      "subject_author": "@bob:local"
+    }
   }
 }
 ```
@@ -162,7 +174,7 @@ Socialware Dev          App Dev              Room              Users
 
 ### 跨 Namespace 引用
 
-跨 namespace 引用 = 查询同一 `state.json`。例如，`ew:merge.execute` 可检查 `ta:task_lifecycle:task-001` 是否处于 `committed` 状态，只需读取同一个 `state.json` 中的对应 key。
+跨 namespace 引用 = 查询同一 `state.json`。例如，`ew:merge.execute` 需要检查 `ta:task_lifecycle` 是否有实例处于 `committed` 状态——只需遍历 `flow_states`，找到 `flow` 字段以 `ta:` 开头且 `state=="committed"` 的条目。
 
 ---
 

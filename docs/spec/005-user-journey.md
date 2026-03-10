@@ -40,17 +40,15 @@ simulation/workspace/rooms/{name}/
 
 ```json
 {
-  "room_id": "{name}",
-  "name": "{name}",
+  "room_id": "room-{name}-001",
+  "name": "{Name}",
+  "created_by": "@{creator}:local",
   "created_at": "{ISO 8601}",
   "membership": {
-    "members": [
-      {
-        "identity": "@{creator}:local",
-        "display_name": "{Creator}",
-        "joined_at": "{ISO 8601}"
-      }
-    ]
+    "policy": "invite",
+    "members": {
+      "@{creator}:local": "owner"
+    }
   },
   "socialware": {
     "installed": [],
@@ -63,12 +61,10 @@ simulation/workspace/rooms/{name}/
 
 ```json
 {
-  "version": 1,
-  "last_clock": 0,
-  "last_updated": "{ISO 8601}",
   "flow_states": {},
   "role_map": {},
   "commitments": {},
+  "last_clock": 0,
   "peer_cursors": {}
 }
 ```
@@ -120,13 +116,12 @@ Lamport Clock: 5
 
 ### 2.4 `/room join {name}` — 加入 Room
 
-**操作**（模拟环境）：将当前 Identity 添加到 Room 的 config.json 的 membership 中。
+**操作**（模拟环境）：将当前 Identity 添加到 Room 的 config.json 的 `membership.members` 中。
 
 ```json
+// config.json 中 membership.members 新增条目:
 {
-  "identity": "@charlie:local",
-  "display_name": "Charlie",
-  "joined_at": "2026-03-09T12:00:00Z"
+  "@charlie:local": "member"
 }
 ```
 
@@ -278,8 +273,8 @@ Identity: @alice:local
 ║    ew:merge   — 合并分支                          ║
 ║──────────────────────────────────────────────────║
 ║  活跃 Flow Instances:                             ║
-║    ta:task_lifecycle:task-001 — submitted         ║
-║    ew:branch_lifecycle:feature-auth — open        ║
+║    msg-001 [ta:task_lifecycle] — submitted        ║
+║    msg-003 [ew:branch_lifecycle] — open           ║
 ╚══════════════════════════════════════════════════╝
 ```
 
@@ -304,10 +299,10 @@ Identity: @alice:local
   execute:
     Tool: manual
     Input: { title: "实现用户认证模块", description: "..." }
-    Output: Content Object → content/msg-006.json
+    Output: Content Object → content/sha256_{hash}.json
   after_write:
     ✓ Append Ref → timeline/shard-001.jsonl (clock: 6)
-    ✓ Update State: ta:task_lifecycle:task-002 = submitted
+    ✓ Update State: flow_states["msg-006"] = { flow: "ta:task_lifecycle", state: "submitted" }
     ✓ Broadcast: 通知 @bob
 
 结果:
@@ -412,7 +407,7 @@ execute:
 
 after_write:
   ✓ Append Ref (clock: 16)
-  ✓ Update State: ew:branch_lifecycle:feature-auth = merged
+  ✓ Update State: flow_states["msg-003"].state = "merged"
 ```
 
 ### 7.2 跨 Namespace 查询

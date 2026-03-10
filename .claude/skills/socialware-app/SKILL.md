@@ -79,9 +79,13 @@ pane 之间通过共享文件系统通信：Alice 写入 timeline → Bob 的 wa
   ├─ Flow 检查: state.json → flow_states
   ├─ 跨 namespace: 同 state.json 内不同 namespace 的 flow_states
   │
-  [execute]
-  ├─ 写 Content → content/sha256_{hash}.json
-  ├─ 执行 binding 工具（bash/mcp/manual/llm）
+  [execute] — 按 §5 绑定的工具类型执行
+  ├─ manual:  提示用户输入内容，等待用户打字
+  ├─ bash:    执行 Shell 命令，捕获 stdout/stderr
+  ├─ mcp:     调用 MCP Server 工具，捕获返回值
+  ├─ api:     发送 HTTP 请求，捕获 response body
+  ├─ llm:     用 prompt template 填入变量，Claude 自主生成内容（无需用户输入）
+  ├─ 工具输出 → 生成 Content Object → content/sha256_{hash}.json
   │
   [after_write]
   ├─ 追加 Ref → timeline/{shard}.jsonl

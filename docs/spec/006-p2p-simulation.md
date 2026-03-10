@@ -54,10 +54,10 @@ Peer A (Alice)                           Peer B (Bob)
 
 ```bash
 # 启动 2 个 peer
-./scripts/start-p2p.sh project-alpha @alice @bob
+.claude/skills/socialware-app/scripts/start-p2p.sh project-alpha @alice @bob
 
 # 启动 3 个 peer
-./scripts/start-p2p.sh project-alpha @alice @bob @charlie
+.claude/skills/socialware-app/scripts/start-p2p.sh project-alpha @alice @bob @charlie
 ```
 
 效果：
@@ -112,7 +112,7 @@ claude
 在独立 pane 或后台运行 `watch-timeline.sh`：
 
 ```bash
-./scripts/watch-timeline.sh project-alpha @bob
+.claude/skills/socialware-app/scripts/watch-timeline.sh project-alpha @bob
 ```
 
 输出：
@@ -207,7 +207,7 @@ flock -x "${ROOM_DIR}/.write.lock" -c '
 如果 state.json 损坏：
 ```bash
 # 从 timeline 重建 state（CRDT 保证）
-python3 scripts/rebuild-state.py simulation/workspace/rooms/{room}
+python3 .claude/skills/socialware-app/scripts/rebuild-state.py simulation/workspace/rooms/{room}
 ```
 
 Timeline 是 append-only 的，不会损坏（最坏情况是最后一行截断，可用 `jq` 检测）。

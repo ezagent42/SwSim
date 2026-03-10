@@ -2,13 +2,15 @@
 # watch-timeline.sh — 监听 Timeline 变化，打印新消息通知
 #
 # 用法:
-#   ./watch-timeline.sh <room_name> <identity>
+#   ./watch-timeline.sh <room_name> [@identity]
 #
 # 示例:
-#   ./watch-timeline.sh project-alpha @bob
+#   ./watch-timeline.sh project-alpha           # 显示所有消息
+#   ./watch-timeline.sh project-alpha @bob      # 过滤掉 @bob 自己的消息
 #
 # 效果:
-#   持续监听 timeline 目录，当有新消息（且不是自己发的）时打印通知。
+#   持续监听 timeline 目录，打印新消息通知。
+#   如果指定 identity，则跳过该身份发出的消息。
 #   可在 tmux 的独立 pane 中运行，作为"通知中心"。
 #
 # 前置条件:
@@ -17,8 +19,8 @@
 
 set -euo pipefail
 
-ROOM_NAME="${1:?用法: $0 <room_name> <identity>}"
-IDENTITY="${2:?用法: $0 <room_name> <identity>}"
+ROOM_NAME="${1:?用法: $0 <room_name> [@identity]}"
+IDENTITY="${2:-}"
 
 TIMELINE_DIR="simulation/workspace/rooms/${ROOM_NAME}/timeline"
 
@@ -30,7 +32,11 @@ fi
 echo "══════════════════════════════════════"
 echo "  Timeline Watcher"
 echo "  Room: ${ROOM_NAME}"
-echo "  监听身份: ${IDENTITY}"
+if [ -n "${IDENTITY}" ]; then
+    echo "  过滤身份: ${IDENTITY}（跳过自己的消息）"
+else
+    echo "  显示所有消息"
+fi
 echo "══════════════════════════════════════"
 echo ""
 
@@ -49,7 +55,10 @@ if command -v inotifywait &>/dev/null; then
 
         # 解析 author
         AUTHOR=$(echo "${LAST_LINE}" | jq -r '.author // empty' 2>/dev/null)
-        if [ -z "${AUTHOR}" ] || [ "${AUTHOR}" = "${IDENTITY}" ]; then
+        if [ -z "${AUTHOR}" ]; then
+            continue
+        fi
+        if [ -n "${IDENTITY}" ] && [ "${AUTHOR}" = "${IDENTITY}" ]; then
             continue  # 跳过自己的消息
         fi
 

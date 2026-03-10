@@ -25,7 +25,7 @@ Template (.socialware.md) + Identity bindings + Tool bindings = Runnable App (.a
 
 模板是组织的抽象设计，App 是模板的具体实例——绑定了真实身份和工具后，可以在 Room 中运行。
 
-## 三层开发模型
+## 四步开发模型
 
 ### 1. `/socialware-dev` — 设计组织图
 
@@ -33,13 +33,19 @@ Template (.socialware.md) + Identity bindings + Tool bindings = Runnable App (.a
 - 输出：模板文件（`.socialware.md`）
 - 工作内容：定义 Role、Flow、Commitment、Arena
 
-### 2. `/socialware-app-dev` — 绑定工具 + 安装到 Room
+### 2. `/room` — 创建协作空间
+
+- 输入：Room 名称 + 创建者
+- 输出：Room 目录结构 + config.json
+- 工作内容：创建/列表/管理 Room，添加成员
+
+### 3. `/socialware-app-dev` — 绑定工具 + 安装到 Room
 
 - 输入：模板 + 目标 Room
 - 输出：绑定后的 App 文件（`.app.md`）
 - 工作内容：复制模板到 Room，绑定 Identity 和 Tool，配置 namespace
 
-### 3. `/socialware-app` — 文字游戏运行时
+### 4. `/socialware-app` — 文字游戏运行时
 
 - 输入：已安装的 App
 - 输出：Timeline 中的持久化交互记录
@@ -76,7 +82,9 @@ SwSim/
 │       ├── 002-socialware-contract.md
 │       ├── 003-socialware-app-contract.md
 │       ├── 004-local-apps.md
-│       └── 005-user-journey.md
+│       ├── 005-user-journey.md
+│       ├── 006-p2p-simulation.md
+│       └── 007-developer-integration.md
 ├── simulation/
 │   ├── contracts/         # Socialware templates (.socialware.md, read-only)
 │   └── workspace/

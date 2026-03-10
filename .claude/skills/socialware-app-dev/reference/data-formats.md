@@ -119,12 +119,14 @@ Flow 实例关联规则:
   },
   "format": "application/json",
   "created_at": "2026-03-09T10:00:00Z",
-  "signature": "sim:not-verified"
+  "signature": "sim:not-verified",
+  "artifacts": []
 }
 ```
 
 - `body`: 动作的具体数据，结构由 binding 的输入/输出定义
 - `format`: `application/json` | `text/plain` | `text/markdown`
+- `artifacts`: 可选，工具生成的副产物文件路径列表（如 `["artifacts/task-001-spec.md"]`）。manual 工具通常为空数组 `[]`，bash/mcp/api 工具可能产生文件
 - 真实系统中 `content_id = sha256(canonical_json(content))`，模拟中简化
 
 ## State Cache

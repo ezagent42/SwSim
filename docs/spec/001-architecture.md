@@ -36,7 +36,7 @@ Arena（边界）
 
 ---
 
-## 3. 三层开发模型
+## 3. 四步开发模型
 
 ### 3.1 Socialware Dev — 设计契约模板
 
@@ -46,7 +46,15 @@ Arena（边界）
 - **存储**：`simulation/contracts/`
 - **性质**：模板是只读产品，可分发、可复用
 
-### 3.2 Socialware App Dev — 绑定契约
+### 3.2 Room — 创建协作空间
+
+- **输入**：Room 名称 + 创建者 Identity
+- **输出**：Room 目录结构 + config.json + state.json
+- **工作**：创建空间、添加成员，为后续安装 Socialware 做准备
+- **存储**：`workspace/rooms/{name}/`
+- **性质**：Room 是独立于 App 的基础设施
+
+### 3.3 Socialware App Dev — 绑定契约
 
 - **输入**：模板 + 目标 Room
 - **输出**：`.app.md` 绑定文件 + workspace 配置
@@ -54,7 +62,7 @@ Arena（边界）
 - **存储**：`workspace/rooms/{name}/contracts/{ns}.app.md`
 - **性质**：App 是模板的具体实例
 
-### 3.3 Socialware App Runtime — 文字游戏执行
+### 3.4 Socialware App Runtime — 文字游戏执行
 
 - **输入**：已安装的 App + 身份
 - **输出**：Timeline entries（append-only JSONL）
@@ -62,14 +70,14 @@ Arena（边界）
 - **性质**：Timeline 是唯一真相源，State 纯推导
 
 ```
-Socialware Dev          Socialware App Dev           Socialware App Runtime
-─────────────          ──────────────────           ──────────────────────
-Design org graph        Bind context                 Execute by contract
-│                      │                            │
-│  .socialware.md      │  .app.md + workspace       │  Timeline grows
-│  (template)          │  (bound + room)            │  State derives
-▼                      ▼                            ▼
-simulation/contracts/  workspace/rooms/{name}/       timeline/*.jsonl
+Socialware Dev    Room Management    Socialware App Dev    Socialware App Runtime
+──────────────    ───────────────    ──────────────────    ──────────────────────
+Design org graph  Create space       Bind context          Execute by contract
+│                │                  │                     │
+│ .socialware.md │ config.json      │ .app.md + workspace │ Timeline grows
+│ (template)     │ state.json       │ (bound + room)      │ State derives
+▼                ▼                  ▼                     ▼
+contracts/       workspace/rooms/   rooms/{name}/         timeline/*.jsonl
 ```
 
 ---
@@ -113,25 +121,47 @@ Room "alpha"
 
 ### 5.1 状态共存
 
-所有 namespace 的 flow_states 共存于同一个 `state.json`：
+所有 namespace 的 flow_states 共存于同一个 `state.json`，key 为 subject Ref 的 `ref_id`：
 
 ```json
 {
   "flow_states": {
-    "ew:branch_lifecycle:feature-auth": { "current": "open", "subject_author": "@alice:local" },
-    "ta:task_lifecycle:task-001": { "current": "submitted", "subject_author": "@bob:local" },
-    "rp:resource_lifecycle:gpu-01": { "current": "allocated", "subject_author": "@alice:local" }
+    "msg-001": {
+      "flow": "ew:branch_lifecycle",
+      "state": "active",
+      "subject_action": "branch.create",
+      "subject_author": "@alice:local",
+      "last_action": "branch.create",
+      "last_ref": "msg-001"
+    },
+    "msg-002": {
+      "flow": "ta:task_lifecycle",
+      "state": "submitted",
+      "subject_action": "task.submit",
+      "subject_author": "@bob:local",
+      "last_action": "task.submit",
+      "last_ref": "msg-002"
+    },
+    "msg-005": {
+      "flow": "rp:resource_lifecycle",
+      "state": "in_use",
+      "subject_action": "resource.request",
+      "subject_author": "@alice:local",
+      "last_action": "resource.allocate",
+      "last_ref": "msg-007"
+    }
   }
 }
 ```
 
 ### 5.2 跨 Namespace 引用
 
-跨 namespace 交互 = 查询同一个 `state.json`，使用不同的 namespace 前缀：
+跨 namespace 交互 = 查询同一个 `state.json`，按 `flow` 字段中的 namespace 前缀过滤：
 
 ```
 ew:merge.execute 需要检查 ta:task_lifecycle 的状态
-→ 读取 state.json 中 "ta:task_lifecycle:*" 的条目
+→ 遍历 state.json 的 flow_states，找到 flow 字段以 "ta:" 开头的条目
+→ 检查对应 state 是否满足前置条件
 → 无需跨 Room 文件读取，全在同一个 state.json 中
 ```
 

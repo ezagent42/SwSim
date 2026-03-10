@@ -1,20 +1,23 @@
 ---
 name: socialware-app-dev
-description: "Bind a Socialware contract template — fills §5 Context Bindings with tools, installs into a Room, generates mock data for cross-references."
+description: "Develop a Socialware App based on an existing contract template — assign roles, fill §5 tool bindings, and install the App into a Room."
 ---
 
-# Socialware App Dev — 契约绑定与安装
+# Socialware App Dev — 基于模板开发 App 并安装到 Room
 
 ## 你在创建什么
 
-**你在把一份 Socialware（组织蓝图）安装到一个 Room 中，使其成为可运行的 App**。
+**你在基于一份 Socialware 模板（组织蓝图）开发一个 App，安装到 Room 中运行**。
+
+模板是只读的蓝图（`.socialware.md`），App 是新生成的可运行实例（`.app.md`）。你不会修改模板——你会复制它，填入具体的角色和工具，生成一个新的 App 文件。
 
 过程:
 - 选择目标 Room（必须已存在，用 `/room create` 创建）
-- 选择一份模板（`.socialware.md`）
+- 选择一份模板（`simulation/contracts/*.socialware.md`）
 - 给每个 Role 指定具体的人（必须是 Room 成员）
 - 给每个动作绑定具体的工具
 - 声明跨契约引用
+- 生成 `{namespace}.app.md` 安装到 Room 的 `contracts/` 目录
 
 ## 制品关系
 
@@ -59,7 +62,15 @@ simulation/contracts/                    simulation/workspace/rooms/{room}/
 ### Phase 3: 填充 Bindings（§5）
 
 8. 逐个动作填充，每次一个:
-   - 工具: `bash:` | `mcp:` | `api:` | `manual` | `llm:`
+   - 工具: 提示时**必须列出全部 5 种**，格式如下:
+     ```
+     工具类型（5 选 1）:
+       manual        — 用户手动输入内容
+       bash: {cmd}   — 执行 Shell 命令（如 bash: python analyze.py）
+       mcp: {s}/{t}  — 调用 MCP Server 工具（如 mcp: ew-server/create_branch）
+       api: {M} {url} — HTTP API 调用（如 api: POST http://localhost:8080/review）
+       llm: {prompt}  — LLM 自主生成内容（如 llm: 根据 {diff} 生成审查意见）
+     ```
    - 输入/输出
    - 消息模板
    - 依赖/委托/资源（从模板的 `_待绑定_` 变为具体引用，或确认 `_无_`）
@@ -80,7 +91,6 @@ simulation/contracts/                    simulation/workspace/rooms/{room}/
 ## 参考
 
 - 数据格式: @reference/data-formats.md
-- 初始化脚本: @scripts/init-workspace.sh
 
 ## 关键原则
 

@@ -171,51 +171,22 @@ Room "alpha"
 
 ```json
 {
-  "room_id": "alpha",
+  "room_id": "room-alpha-001",
   "name": "Alpha Team Room",
+  "created_by": "@alice:local",
   "created_at": "2026-03-09T10:00:00Z",
   "membership": {
-    "members": [
-      {
-        "identity": "@alice:local",
-        "display_name": "Alice",
-        "joined_at": "2026-03-09T10:00:00Z"
-      },
-      {
-        "identity": "@bob:local",
-        "display_name": "Bob",
-        "joined_at": "2026-03-09T10:05:00Z"
-      }
-    ]
+    "policy": "invite",
+    "members": {
+      "@alice:local": "owner",
+      "@bob:local": "member"
+    }
   },
   "socialware": {
     "installed": ["ta", "ew", "rp"],
     "roles": {
-      "ta": {
-        "contract": "contracts/ta.app.md",
-        "template_source": "two-role-submit-approve.socialware.md",
-        "role_map": {
-          "R1": "@alice:local",
-          "R2": "@bob:local"
-        }
-      },
-      "ew": {
-        "contract": "contracts/ew.app.md",
-        "template_source": "event-weaver.socialware.md",
-        "role_map": {
-          "R1": "@alice:local",
-          "R2": "@bob:local",
-          "R3": "@alice:local"
-        }
-      },
-      "rp": {
-        "contract": "contracts/rp.app.md",
-        "template_source": "resource-pool.socialware.md",
-        "role_map": {
-          "R1": "@bob:local",
-          "R2": "@alice:local"
-        }
-      }
+      "@alice:local": ["ta:poster", "ew:emitter", "ew:brancher", "rp:requester"],
+      "@bob:local": ["ta:approver", "ew:merger", "rp:allocator"]
     }
   }
 }
@@ -225,18 +196,16 @@ Room "alpha"
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `room_id` | string | Room 唯一标识符 |
+| `room_id` | string | Room 唯一标识符（`room-{name}-{seq}`） |
 | `name` | string | Room 显示名称 |
+| `created_by` | string | 创建者 Identity |
 | `created_at` | ISO 8601 | 创建时间 |
-| `membership.members[]` | array | Room 成员列表 |
-| `membership.members[].identity` | string | 成员 Identity（`@name:domain`） |
-| `membership.members[].display_name` | string | 显示名 |
-| `membership.members[].joined_at` | ISO 8601 | 加入时间 |
+| `membership.policy` | string | `open` \| `knock` \| `invite`（映射 Arena §4） |
+| `membership.members` | object | entity → room role（`owner` \| `admin` \| `member`） |
 | `socialware.installed` | string[] | 已安装的 namespace 列表 |
-| `socialware.roles.{ns}` | object | 每个 namespace 的角色映射 |
-| `socialware.roles.{ns}.contract` | string | App 契约文件的相对路径 |
-| `socialware.roles.{ns}.template_source` | string | 来源模板文件名 |
-| `socialware.roles.{ns}.role_map` | object | Role ID → Identity 的映射 |
+| `socialware.roles` | object | entity → Socialware Role 列表（`{ns}:{role_name}` 格式） |
+
+> **Note**: 每个 namespace 的契约路径和来源模板可从文件系统推导——契约文件在 `contracts/{ns}.app.md`，来源模板记录在 `.app.md` 的 Header 中。
 
 ---
 
@@ -496,34 +465,22 @@ workspace/rooms/{name}/artifacts/
 
 ```json
 {
-  "room_id": "alpha",
+  "room_id": "room-alpha-001",
   "name": "Alpha Team Room",
+  "created_by": "@alice:local",
   "created_at": "2026-03-09T10:00:00Z",
   "membership": {
-    "members": [
-      {
-        "identity": "@alice:local",
-        "display_name": "Alice",
-        "joined_at": "2026-03-09T10:00:00Z"
-      },
-      {
-        "identity": "@bob:local",
-        "display_name": "Bob",
-        "joined_at": "2026-03-09T10:05:00Z"
-      }
-    ]
+    "policy": "invite",
+    "members": {
+      "@alice:local": "owner",
+      "@bob:local": "member"
+    }
   },
   "socialware": {
     "installed": ["ta"],
     "roles": {
-      "ta": {
-        "contract": "contracts/ta.app.md",
-        "template_source": "two-role-submit-approve.socialware.md",
-        "role_map": {
-          "R1": "@alice:local",
-          "R2": "@bob:local"
-        }
-      }
+      "@alice:local": ["ta:poster"],
+      "@bob:local": ["ta:approver"]
     }
   }
 }

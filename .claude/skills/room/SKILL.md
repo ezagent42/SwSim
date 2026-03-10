@@ -30,7 +30,7 @@ Room ≠ App。Room 是空间，App 是空间中可运行的指令集。一个 R
    ├── artifacts/
    └── state.json     # 初始状态
    ```
-3. 询问 Room 创建者身份（@entity:local）
+3. 询问 Room 创建者身份，提示格式为 `@entity:local`（如 `@alice:local`）
 4. 生成初始 config.json:
    ```json
    {
@@ -60,7 +60,15 @@ Room ≠ App。Room 是空间，App 是空间中可运行的指令集。一个 R
      "peer_cursors": {}
    }
    ```
-6. 如果创建者的 identity 文件不存在，创建 `simulation/workspace/identities/@{entity}.json`
+6. 如果创建者的 identity 文件不存在，创建 `simulation/workspace/identities/@{entity}.json`：
+   ```json
+   {
+     "entity_id": "@{entity}:local",
+     "pubkey_sim": "sim:placeholder",
+     "created_at": "{ISO8601}"
+   }
+   ```
+7. 在 `simulation/workspace/rooms/{name}/identities/` 创建成员引用 `@{entity}.json`（与全局 identity 相同内容）
 
 ### `/room list`
 
@@ -90,10 +98,22 @@ Room ≠ App。Room 是空间，App 是空间中可运行的指令集。一个 R
 将成员加入 Room:
 
 1. 检查 Room 是否存在
-2. 检查 identity 文件是否存在，不存在则创建
-3. 将 identity 添加到 config.json 的 membership.members
-4. 在 `simulation/workspace/rooms/{name}/identities/` 创建成员引用
-5. 初始化 peer_cursors
+2. 检查 `simulation/workspace/identities/@{entity}.json` 是否存在，不存在则创建（格式同 create 步骤 6）
+3. 将 identity 添加到 config.json 的 `membership.members`：`"@{entity}:local": "member"`
+4. 在 `simulation/workspace/rooms/{name}/identities/` 创建成员引用 `@{entity}.json`（与全局 identity 相同内容）
+5. 在 state.json 的 `peer_cursors` 中初始化：`"@{entity}:local": 0`
+
+## 参考
+
+- 初始化脚本: @init-workspace.sh
+
+## 完成提示
+
+Room 创建/加入完成后，提示用户下一步：
+
+> Room 已就绪。下一步可以用 `/socialware-app-dev` 基于已有的 Socialware 模板开发 App，安装到此 Room 中。
+
+**注意措辞**：不要说"将模板绑定到 Room"。正确说法是"基于模板开发 App，安装到 Room"。模板是只读的蓝图，App 是新生成的可运行实例。
 
 ## 关键原则
 

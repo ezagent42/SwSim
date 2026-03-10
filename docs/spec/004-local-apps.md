@@ -307,7 +307,7 @@ execute (工具运行):
 ├── 读取 §5: Tool = manual
 ├── 执行: 提示用户输入任务详情
 ├── 用户输入: { title: "实现用户认证", desc: "JWT + OAuth2" }
-├── 生成 Content Object → content/msg-001.json
+├── 生成 Content Object → content/sha256_{hash}.json
 └── 无 Artifact
     │
     ▼

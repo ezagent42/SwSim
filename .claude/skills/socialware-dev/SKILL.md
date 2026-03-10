@@ -32,7 +32,20 @@ Socialware 是一份 `.socialware.md` 文件，用四个原语描述组织图：
 
 1. **场景**: 这个组织做什么？有哪些角色（位置，不是人）？
 2. **§1 Roles**: 整理角色表（ID, 名称, 能力），持有者全部 `_待绑定_`
-3. **§2 Flows**: 每个流程的状态机（subject, 状态, 转换, 角色, 能力约束[any/author/author | role:R]）
+3. **§2 Flows**: 每个流程的状态机，**严格遵守以下格式**：
+   - 5 列：`当前状态 | 动作 | 下一状态 | 要求角色 | 能力约束`
+   - **要求角色**列必须用 R-ID（`R1`, `R2`），不能用角色名（~~submitter~~）
+   - **能力约束**列只能是三选一：`any` / `author` / `author | role:{R}`，不能写能力名（~~submit~~）
+   - **subject 动作**（创建 Flow 实例的第一个动作）的当前状态写 `_none_`
+   - 示例：
+     ```
+     | 当前状态   | 动作    | 下一状态   | 要求角色 | 能力约束 |
+     |-----------|---------|-----------|---------|---------|
+     | _none_    | submit  | submitted | R1      | any     |
+     | submitted | approve | approved  | R2      | any     |
+     | submitted | reject  | rejected  | R2      | any     |
+     | rejected  | revise  | submitted | R1      | author  |
+     ```
 4. **§3 Commitments**: 角色间的承诺（双方, 触发条件, 时限）
 5. **§4 Arena**: 进入策略
 6. **§5 Bindings**: 自动生成骨架（从 Flow 提取动作），工具全部 `_待绑定_`

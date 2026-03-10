@@ -15,7 +15,7 @@ SwSim is a Socialware contract-file model simulation. It simulates the full life
 ## Directory Structure
 
 - `docs/` — Specs and plans
-- `docs/spec/` — Five spec documents (architecture, contract, app-contract, local-apps, user-journey)
+- `docs/spec/` — Seven spec documents (architecture, contract, app-contract, local-apps, user-journey, p2p-simulation, developer-integration)
 - `simulation/contracts/` — Socialware templates (`.socialware.md`, read-only)
 - `simulation/workspace/` — Runtime data (identities, rooms)
 - `.claude/skills/` — Four Skills (socialware-dev, socialware-app-dev, socialware-app, room)
