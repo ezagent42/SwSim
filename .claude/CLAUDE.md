@@ -2,37 +2,68 @@
 
 ## Project Overview
 
-SwSim is a Socialware contract-file model simulation. It simulates the full lifecycle of Socialware — from designing organizations (contract templates) to binding and running them as Apps in Rooms.
+SwSim is a Socialware contract-file model simulation. It simulates the full lifecycle of Socialware — from designing organizations (contract templates) to developing, installing, and running them as Apps in Rooms.
 
 ## Key Concepts
 
 - **Socialware** = contract file (`.socialware.md`) defining organization with 4 primitives (Role, Flow, Commitment, Arena)
-- **Socialware App** = bound contract (`.app.md`) + workspace
+- **Socialware App** = developed contract (`.app.md`) with tool bindings filled
+- **App Store** = `workspace/app-store/` — developed Apps awaiting installation
 - **Room** = collaboration space, can host multiple Socialware (Room ≠ App)
 - **Timeline** = append-only JSONL, single source of truth
 - **State** = pure-derived from Timeline, can be rebuilt anytime
+- **Identity** = `{username}:{nickname}@{namespace}` format (e.g., `alice:Alice@local`), no `@` prefix
+- **Identity 前置条件** = 所有 Skill 启动时必须确认身份（`workspace/identities/` 中存在），`/room` 是身份的创建入口
 
 ## Directory Structure
 
 - `docs/` — Specs and plans
-- `docs/spec/` — Seven spec documents (architecture, contract, app-contract, local-apps, user-journey, p2p-simulation, developer-integration)
+- `docs/spec/` — Seven spec documents
+- `docs/testcase/` — Thirteen test cases
 - `simulation/contracts/` — Socialware templates (`.socialware.md`, read-only)
-- `simulation/workspace/` — Runtime data (identities, rooms)
-- `.claude/skills/` — Four Skills (socialware-dev, socialware-app-dev, socialware-app, room)
+- `simulation/workspace/app-store/` — Developed Apps (`.app.md`, tools bound, users unbound)
+- `simulation/workspace/identities/` — Global identity files
+- `simulation/workspace/rooms/` — Rooms with installed Apps
+- `.claude/skills/` — Five Skills (socialware-dev, socialware-app-dev, socialware-app-install, socialware-app, room)
+- `.claude/scripts/` — Hook scripts (check-inbox.sh)
+
+## Five-Stage Lifecycle
+
+```
+room  →  socialware-dev  →  socialware-app-dev  →  socialware-app-install  →  socialware-app
+创建空间    模板设计            App 开发                App 安装到 Room            运行时
+创建身份    需要身份(开发者)     需要身份(开发者)         需要身份(安装者)+Room成员   需要身份+Room成员
+
+contracts/            app-store/                rooms/{room}/contracts/     runtime
+{name}.socialware.md  {app-id}.app.md           {app-id}.app.md            timeline+state
+
+开发者: {identity}    开发者: {identity}         安装者: {identity}
+§1 = _待绑定_          §1 = _待绑定_              §1 = 已填持有者
+§5 = _待实现_          §5 = 已填工具              §5 = 同 app-store
+状态: 模板             状态: 已开发               状态: 已安装
+```
 
 ## Naming Convention
 
 - Templates: `{descriptive-name}.socialware.md` (e.g., `two-role-submit-approve.socialware.md`)
-- Bound apps: `{namespace}.app.md` (e.g., `ta.app.md`)
-- Names are decoupled — template name ≠ app name
+- App-ID: descriptive name (e.g., `doc-review-workflow`)
+- Namespace: 2-4 letter abbreviation, chosen at install time (e.g., `dc`, `ta`)
+- Names are decoupled — template name ≠ app-id ≠ namespace
+
+## Placeholder Convention
+
+- `_待实现_`: §5 tool bindings, awaiting App Dev to fill in tool implementations
+- `_待绑定_`: §1 role holders, awaiting App Install to assign specific users
+- `_无_`: explicitly no dependency (design decision)
 
 ## Development Rules
 
 1. Template files in `simulation/contracts/` are **READ-ONLY** after creation
-2. App Dev copies template to `workspace/rooms/{room}/contracts/{ns}.app.md` and binds there
-3. Timeline is **append-only** — never edit or delete entries
-4. State is always rebuildable from Timeline (`/rebuild`)
-5. Use Chinese for documentation, English for variable names and code
+2. App Dev copies template to `workspace/app-store/{app-id}.app.md` and fills §5 tools
+3. App Install copies from app-store to `workspace/rooms/{room}/contracts/` and fills §1 holders
+4. Timeline is **append-only** — never edit or delete entries
+5. State is always rebuildable from Timeline (`/rebuild`)
+6. Use Chinese for documentation, English for variable names and code
 
 ## Skills
 
@@ -40,13 +71,16 @@ SwSim is a Socialware contract-file model simulation. It simulates the full life
 |-------|------|------|
 | `/socialware-dev` | 设计组织 → 模板 | `.socialware.md` |
 | `/room` | 创建/列表/管理 Room | Room 目录 + config.json |
-| `/socialware-app-dev` | 绑定模板 + 安装到 Room | `.app.md` |
+| `/socialware-app-dev` | 开发 App（填工具） | `app-store/{app-id}.app.md` |
+| `/socialware-app-install` | 安装 App 到 Room（绑用户） | `rooms/{room}/contracts/` |
 | `/socialware-app` | 运行 App（文字游戏运行时） | Timeline entries |
 
 ## P2P Simulation
 
 - **Multi-session mode**: Each Claude Code session = one peer identity, sharing workspace files
-- **Single-session mode**: Use `/switch @entity` for identity switching (fallback)
+- **Single-session mode**: Use `/switch {entity}:{nickname}@local` for identity switching (fallback)
+- **Inbox hook**: `UserPromptSubmit` hook checks `.active-session.json` for new messages
+- **tmux watcher**: Each peer gets a watcher pane for passive notification
 - Shared filesystem = P2P network (Zenoh simulation)
 
 ## Room Model
@@ -56,8 +90,8 @@ Room 可以承载多个 Socialware App，每个 App 提供一个 namespace：
 ```
 Room "alpha"/
 ├── contracts/
-│   ├── ta.app.md       (namespace: ta)
-│   └── standup.app.md  (namespace: su)
+│   ├── task-assignment.app.md  (namespace: ta)
+│   └── standup.app.md          (namespace: su)
 ├── state.json          (合并所有 namespace 的状态)
 └── timeline/           (所有 App 共享的 append-only 时间线)
 ```

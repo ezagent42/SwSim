@@ -8,39 +8,42 @@
 
 ## 1. 概述
 
-`.app.md` 是 Socialware 的**绑定契约文件**。它是模板（`.socialware.md`）的具体实例——所有 `_待绑定_` 字段已填入真实的 Identity、Tool 和跨契约引用。
-
-`.app.md` 安装在 Room 中，为 Room 提供一个 namespace 的命令集。
+`.app.md` 是 Socialware 的**绑定契约文件**。它有两种状态：
+- **已开发**（App Dev 产出）：所有 §5 `_待实现_` 字段已填入 Tool 和跨契约引用，但 §1 Holder 仍为 `_待绑定_`。存储在 `workspace/app-store/`。
+- **已安装**（App Install 产出）：所有字段已填入真实值，§1 Holder 绑定为具体 Identity。安装在 Room 中，为 Room 提供一个 namespace 的命令集。
 
 ---
 
 ## 2. 与模板的关系
 
-| 属性 | 模板 (.socialware.md) | App (.app.md) |
-|------|----------------------|---------------|
-| 性质 | 抽象设计，只读产品 | 具体实例，可运行 |
-| Holder | `_待绑定_` | 绑定为 `@alice:local` 等 |
-| Tool | `_待绑定_` | 绑定为 `bash: ...` 等 |
-| 引用 | `_待绑定_` 或 `_无_` | 具体路径或 `_无_` |
-| Status | `模板` | `已绑定` |
-| 存储 | `simulation/contracts/` | `workspace/rooms/{room}/contracts/` |
+| 属性 | 模板 (.socialware.md) | 已开发 App (.app.md) | 已安装 App (.app.md) |
+|------|----------------------|---------------------|---------------------|
+| 性质 | 抽象设计，只读产品 | 工具已绑定，可安装 | 具体实例，可运行 |
+| Holder | `_待绑定_` | `_待绑定_` | 绑定为 `alice:Alice@local` 等 |
+| Tool | `_待实现_` | 绑定为 `bash: ...` 等 | 绑定为 `bash: ...` 等 |
+| 引用 | `_待实现_` 或 `_无_` | 具体路径或 `_无_` | 具体路径或 `_无_` |
+| Status | `模板` | `已开发` | `已安装` |
+| 存储 | `simulation/contracts/` | `workspace/app-store/` | `workspace/rooms/{room}/contracts/` |
 
-**创建流程**：App Dev 复制模板 → 填充所有 `_待绑定_` → 保存为 `.app.md`。模板保持只读。
+**创建流程**：App Dev 复制模板 → 填充所有 §5 `_待实现_` → 保存为 `.app.md`（已开发）到 app-store。App Install 从 app-store 复制 → 填充 §1 `_待绑定_` → 安装到 Room。模板保持只读。
 
 ---
 
 ## 3. 命名规则
 
-模板名和 App 名是**解耦的**，用户独立选择：
+模板名、App-ID、namespace 三者**解耦**，用户在各阶段独立选择：
 
 | 层级 | 命名 | 示例 |
 |------|------|------|
 | 模板 | `{descriptive-name}.socialware.md` | `two-role-submit-approve.socialware.md` |
-| App | `{namespace}.app.md` | `ta.app.md` |
+| App（app-store） | `{app-id}.app.md` | `doc-review-workflow.app.md` |
+| App（已安装） | `{app-id}.app.md`（复制到 Room） | `doc-review-workflow.app.md` |
+| Namespace | 2-4 字母简称，install 时选择 | `da`, `ta`, `ew` |
 
 - 模板名描述组织设计（what it is）
-- App 名是 namespace 缩写（how it's called in this Room）
-- 同一个模板可以在不同 Room 以不同 namespace 安装
+- App-ID 是描述性名称（what app it becomes）
+- Namespace 是 Room 内的短缩写（how it's called in this Room）
+- 同一个模板可以被不同 App Dev 开发成不同 App，同一 App 可安装到多个 Room
 
 ---
 
@@ -48,19 +51,34 @@
 
 ### 4.1 Header
 
-```markdown
-# {App 名称}
+**已开发阶段**（`app-store/{app-id}.app.md`）:
 
-> **类型**：Socialware App（已绑定）
-> **状态**：已绑定
-> **来源模板**：{模板文件名}
-> **Namespace**：{ns}
-> **Room**：{room_name}
-> **绑定者**：{binder}
-> **日期**：{YYYY-MM-DD}
+```markdown
+# {app-id}.app.md
+
+> 状态: 已开发
+> App-ID: {app-id}
+> 基于模板: {template_name}.socialware.md
+> 开发者: {username}:{nickname}@{namespace}
 ```
 
-### 4.2 §1 Roles — 已绑定角色
+**已安装阶段**（`rooms/{room}/contracts/{app-id}.app.md`）:
+
+```markdown
+# {app-id}.app.md
+
+> 状态: 已安装
+> App-ID: {app-id}
+> 基于模板: {template_name}.socialware.md
+> 开发者: {username}:{nickname}@{namespace}
+> 安装者: {username}:{nickname}@{namespace}
+> Namespace: {ns}
+> Room: {room_name}
+```
+
+**开发者/安装者**: 必填，由各阶段操作者的当前身份自动填入。操作者必须先在 `workspace/identities/` 中拥有身份。
+
+### 4.2 §1 Roles — 已安装角色
 
 Holder 填入具体 Identity：
 
@@ -69,11 +87,11 @@ Holder 填入具体 Identity：
 
 | ID | 名称 | Capabilities | Holder |
 |----|------|-------------|--------|
-| R1 | 提交者 | submit, revise | @alice:local |
-| R2 | 审批者 | approve, reject | @bob:local |
+| R1 | 提交者 | submit, revise | alice:Alice@local |
+| R2 | 审批者 | approve, reject | bob:Bob@local |
 ```
 
-**Identity 格式**：`@{name}:{domain}`，模拟环境中 domain 为 `local`。
+**Identity 格式**：`{username}:{nickname}@{namespace}`，模拟环境中 namespace 为 `local`。
 
 ### 4.3 §2 Flows — 不变
 
@@ -87,36 +105,34 @@ Commitment 定义从模板直接复制。
 
 Arena 定义从模板直接复制。
 
-### 4.6 §5 Context Bindings — 已绑定
+### 4.6 §5 Context Bindings — 已实现
 
-所有 `_待绑定_` 字段填入具体值：
+所有 `_待实现_` 字段填入具体值（在 App Dev 阶段完成）：
 
 ```markdown
 ## §5 Context Bindings
 
-### Action: task_lifecycle.submit
+### on: submit
 
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | manual |
-| 输入 (Input) | 任务标题 + 描述 |
-| 输出 (Output) | 任务提交确认消息 |
-| 消息模板 (Message Template) | 📋 @{author} 提交了任务: {title} |
-| 依赖 (Requires) | _无_ |
-| 委托 (Delegates) | _无_ |
-| 资源 (Requests) | _无_ |
+- 前置: R1
+- 工具: manual
+- 输入: 任务标题 + 描述
+- 输出: 任务提交确认消息
+- 消息模板: "📋 @{author} 提交了任务: {title}"
+- 依赖: _无_
+- 委托: _无_
+- 资源: _无_
 
-### Action: task_lifecycle.approve
+### on: approve
 
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | manual |
-| 输入 (Input) | 审批意见 |
-| 输出 (Output) | 审批结果通知 |
-| 消息模板 (Message Template) | ✅ @{author} 审批通过: {comment} |
-| 依赖 (Requires) | [ta:task_lifecycle.submitted](state.json) |
-| 委托 (Delegates) | _无_ |
-| 资源 (Requests) | _无_ |
+- 前置: R2
+- 工具: manual
+- 输入: 审批意见
+- 输出: 审批结果通知
+- 消息模板: "✅ @{author} 审批通过: {comment}"
+- 依赖: [ta:task_lifecycle submitted](同 Room)
+- 委托: _无_
+- 资源: _无_
 ```
 
 ### 4.7 §6 Simulation Environment — 模拟环境配置
@@ -129,7 +145,7 @@ App 文件新增的章节，定义运行时环境：
 | 属性 | 值 |
 |------|-----|
 | Workspace 路径 | simulation/workspace/rooms/{room_name}/ |
-| Identity 模拟 | 文件系统身份（@name:local） |
+| Identity 模拟 | 文件系统身份（{username}:{nickname}@local） |
 | P2P 模式 | multi-session（推荐）或 single-session |
 | 持久化 | Timeline = JSONL, State = JSON |
 ```
@@ -153,9 +169,9 @@ App 文件新增的章节，定义运行时环境：
 ```
 Room "alpha"
 ├── contracts/
-│   ├── ta.app.md    (namespace: ta)
-│   ├── ew.app.md    (namespace: ew)
-│   └── rp.app.md    (namespace: rp)
+│   ├── task-arena.app.md       (namespace: ta)
+│   ├── edit-workflow.app.md    (namespace: ew)
+│   └── resource-pool.app.md   (namespace: rp)
 ├── config.json      (注册所有 namespace)
 ├── state.json       (合并所有 namespace 的 flow_states)
 └── timeline/        (共享 timeline)
@@ -173,20 +189,44 @@ Room "alpha"
 {
   "room_id": "room-alpha-001",
   "name": "Alpha Team Room",
-  "created_by": "@alice:local",
+  "created_by": "alice:Alice@local",
   "created_at": "2026-03-09T10:00:00Z",
   "membership": {
     "policy": "invite",
     "members": {
-      "@alice:local": "owner",
-      "@bob:local": "member"
+      "alice:Alice@local": "owner",
+      "bob:Bob@local": "member"
     }
   },
   "socialware": {
-    "installed": ["ta", "ew", "rp"],
+    "installed": [
+      {
+        "app_id": "task-arena",
+        "namespace": "ta",
+        "contract": "task-arena.app.md",
+        "template": "two-role-submit-approve.socialware.md"
+      },
+      {
+        "app_id": "edit-workflow",
+        "namespace": "ew",
+        "contract": "edit-workflow.app.md",
+        "template": "branch-merge.socialware.md"
+      },
+      {
+        "app_id": "resource-pool",
+        "namespace": "rp",
+        "contract": "resource-pool.app.md",
+        "template": "resource-allocation.socialware.md"
+      }
+    ],
     "roles": {
-      "@alice:local": ["ta:poster", "ew:emitter", "ew:brancher", "rp:requester"],
-      "@bob:local": ["ta:approver", "ew:merger", "rp:allocator"]
+      "ta:R1": "alice:Alice@local",
+      "ta:R2": "bob:Bob@local",
+      "ew:R1": "alice:Alice@local",
+      "ew:R2": "alice:Alice@local",
+      "ew:R3": "bob:Bob@local",
+      "rp:R1": "alice:Alice@local",
+      "rp:R2": "bob:Bob@local"
     }
   }
 }
@@ -202,10 +242,8 @@ Room "alpha"
 | `created_at` | ISO 8601 | 创建时间 |
 | `membership.policy` | string | `open` \| `knock` \| `invite`（映射 Arena §4） |
 | `membership.members` | object | entity → room role（`owner` \| `admin` \| `member`） |
-| `socialware.installed` | string[] | 已安装的 namespace 列表 |
-| `socialware.roles` | object | entity → Socialware Role 列表（`{ns}:{role_name}` 格式） |
-
-> **Note**: 每个 namespace 的契约路径和来源模板可从文件系统推导——契约文件在 `contracts/{ns}.app.md`，来源模板记录在 `.app.md` 的 Header 中。
+| `socialware.installed` | array | 已安装 App 的对象数组，每项含 `app_id`, `namespace`, `contract`, `template` |
+| `socialware.roles` | object | `{ns}:{R-ID}` → `{username}:{nickname}@{namespace}`，每个角色到身份的映射 |
 
 ---
 
@@ -218,7 +256,7 @@ Timeline 中的每条 entry 是一个 Ref，记录消息的元数据和指向 Co
 ```json
 {
   "ref_id": "msg-001",
-  "author": "@alice:local",
+  "author": "alice:Alice@local",
   "content_type": "immutable",
   "content_id": "sha256:a1b2c3",
   "created_at": "2026-03-09T10:30:00Z",
@@ -240,7 +278,7 @@ Timeline 中的每条 entry 是一个 Ref，记录消息的元数据和指向 Co
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `ref_id` | string | 全局唯一（真实系统用 ULID，模拟用 `msg-{seq}`） |
-| `author` | string | 消息发送者的 Identity（`@entity:local`） |
+| `author` | string | 消息发送者的 Identity（`{username}:{nickname}@{namespace}`） |
 | `content_type` | string | `immutable`（不可变消息） |
 | `content_id` | string | Content Object 的 hash（`sha256:xxx`） |
 | `created_at` | ISO 8601 | 创建时间 |
@@ -265,7 +303,7 @@ Timeline 中的每条 entry 是一个 Ref，记录消息的元数据和指向 Co
 {
   "content_id": "sha256:a1b2c3",
   "type": "immutable",
-  "author": "@alice:local",
+  "author": "alice:Alice@local",
   "body": {
     "title": "实现用户认证模块",
     "description": "使用 JWT + OAuth2 实现用户认证"
@@ -295,7 +333,7 @@ Timeline 中的每条 entry 是一个 Ref，记录消息的元数据和指向 Co
       "flow": "ta:task_lifecycle",
       "state": "submitted",
       "subject_action": "task.submit",
-      "subject_author": "@alice:local",
+      "subject_author": "alice:Alice@local",
       "last_action": "task.submit",
       "last_ref": "msg-001"
     },
@@ -303,14 +341,17 @@ Timeline 中的每条 entry 是一个 Ref，记录消息的元数据和指向 Co
       "flow": "ew:branch_lifecycle",
       "state": "active",
       "subject_action": "branch.create",
-      "subject_author": "@alice:local",
+      "subject_author": "alice:Alice@local",
       "last_action": "branch.create",
       "last_ref": "msg-003"
     }
   },
   "role_map": {
-    "@alice:local": ["ta:poster", "ew:emitter", "ew:brancher"],
-    "@bob:local": ["ta:worker", "ew:merger"]
+    "ta:R1": "alice:Alice@local",
+    "ta:R2": "bob:Bob@local",
+    "ew:R1": "alice:Alice@local",
+    "ew:R2": "alice:Alice@local",
+    "ew:R3": "bob:Bob@local"
   },
   "commitments": {
     "ta:C1": {
@@ -321,8 +362,8 @@ Timeline 中的每条 entry 是一个 Ref，记录消息的元数据和指向 Co
   },
   "last_clock": 5,
   "peer_cursors": {
-    "@alice:local": 5,
-    "@bob:local": 3
+    "alice:Alice@local": 5,
+    "bob:Bob@local": 3
   }
 }
 ```
@@ -336,7 +377,7 @@ Timeline 中的每条 entry 是一个 Ref，记录消息的元数据和指向 Co
 | `flow_states.*.subject_author` | string | 创建者（用于 CBAC `author` 检查） |
 | `flow_states.*.last_action` | string | 最后执行的动作 |
 | `flow_states.*.last_ref` | string | 最后一条相关 Ref 的 ID |
-| `role_map` | object | entity → `[ns:role, ...]`（从 config.json 复制，不随 timeline 变化） |
+| `role_map` | object | `{ns}:{R-ID}` → entity，从 config.json 的 `socialware.roles` 复制（不随 timeline 变化） |
 | `commitments` | object | `{ns}:{id}` → 状态（`inactive` \| `active` \| `fulfilled` \| `violated`） |
 | `last_clock` | integer | 当前最大 Lamport clock |
 | `peer_cursors` | object | entity → 该 peer 上次见过的最大 clock（integer） |
@@ -356,25 +397,25 @@ workspace/rooms/{name}/artifacts/
 
 ## 8. 完整示例
 
-### 8.1 ta.app.md
+### 8.1 task-arena.app.md
 
 ```markdown
-# TaskArena (ta)
+# task-arena.app.md
 
-> **类型**：Socialware App（已绑定）
-> **状态**：已绑定
-> **来源模板**：two-role-submit-approve.socialware.md
-> **Namespace**：ta
-> **Room**：alpha
-> **绑定者**：@alice:local
-> **日期**：2026-03-09
+> 状态: 已安装
+> App-ID: task-arena
+> 基于模板: two-role-submit-approve.socialware.md
+> 开发者: alice:Alice@local
+> 安装者: alice:Alice@local
+> Namespace: ta
+> Room: alpha
 
 ## §1 Roles
 
 | ID | 名称 | Capabilities | Holder |
 |----|------|-------------|--------|
-| R1 | 提交者 | submit, revise | @alice:local |
-| R2 | 审批者 | approve, reject | @bob:local |
+| R1 | 提交者 | submit, revise | alice:Alice@local |
+| R2 | 审批者 | approve, reject | bob:Bob@local |
 
 ## §2 Flows
 
@@ -396,67 +437,61 @@ workspace/rooms/{name}/artifacts/
 
 ## §4 Arena
 
-| 属性 | 值 |
-|------|-----|
-| 准入策略 | role_based |
-| 准入条件 | 必须被分配 R1 或 R2 角色 |
+- 进入策略: role_based
+- 准入条件: 必须被分配 R1 或 R2 角色
 
 ## §5 Context Bindings
 
-### Action: task_lifecycle.submit
+### on: submit
 
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | manual |
-| 输入 (Input) | 任务标题 + 描述文本 |
-| 输出 (Output) | 任务提交确认 |
-| 消息模板 (Message Template) | 📋 @{author} 提交了任务: {title} |
-| 依赖 (Requires) | _无_ |
-| 委托 (Delegates) | _无_ |
-| 资源 (Requests) | _无_ |
+- 前置: R1
+- 工具: manual
+- 输入: 任务标题 + 描述文本
+- 输出: 任务提交确认
+- 消息模板: "📋 @{author} 提交了任务: {title}"
+- 依赖: _无_
+- 委托: _无_
+- 资源: _无_
 
-### Action: task_lifecycle.approve
+### on: approve
 
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | manual |
-| 输入 (Input) | 审批意见文本 |
-| 输出 (Output) | 审批通过通知 |
-| 消息模板 (Message Template) | ✅ @{author} 审批通过: {comment} |
-| 依赖 (Requires) | [ta:task_lifecycle.submitted](state.json) |
-| 委托 (Delegates) | _无_ |
-| 资源 (Requests) | _无_ |
+- 前置: R2
+- 工具: manual
+- 输入: 审批意见文本
+- 输出: 审批通过通知
+- 消息模板: "✅ @{author} 审批通过: {comment}"
+- 依赖: [ta:task_lifecycle submitted](同 Room)
+- 委托: _无_
+- 资源: _无_
 
-### Action: task_lifecycle.reject
+### on: reject
 
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | manual |
-| 输入 (Input) | 驳回原因文本 |
-| 输出 (Output) | 驳回通知 |
-| 消息模板 (Message Template) | ❌ @{author} 驳回了任务: {reason} |
-| 依赖 (Requires) | [ta:task_lifecycle.submitted](state.json) |
-| 委托 (Delegates) | _无_ |
-| 资源 (Requests) | _无_ |
+- 前置: R2
+- 工具: manual
+- 输入: 驳回原因文本
+- 输出: 驳回通知
+- 消息模板: "❌ @{author} 驳回了任务: {reason}"
+- 依赖: [ta:task_lifecycle submitted](同 Room)
+- 委托: _无_
+- 资源: _无_
 
-### Action: task_lifecycle.revise
+### on: revise
 
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | manual |
-| 输入 (Input) | 修改后的任务描述 |
-| 输出 (Output) | 修改提交确认 |
-| 消息模板 (Message Template) | 🔄 @{author} 修改并重新提交了任务: {title} |
-| 依赖 (Requires) | _无_ |
-| 委托 (Delegates) | _无_ |
-| 资源 (Requests) | _无_ |
+- 前置: R1 + 状态=rejected
+- 工具: manual
+- 输入: 修改后的任务描述
+- 输出: 修改提交确认
+- 消息模板: "🔄 @{author} 修改并重新提交了任务: {title}"
+- 依赖: _无_
+- 委托: _无_
+- 资源: _无_
 
 ## §6 Simulation Environment
 
 | 属性 | 值 |
 |------|-----|
 | Workspace 路径 | simulation/workspace/rooms/alpha/ |
-| Identity 模拟 | 文件系统身份（@name:local） |
+| Identity 模拟 | 文件系统身份（{username}:{nickname}@local） |
 | P2P 模式 | multi-session |
 | 持久化 | Timeline = JSONL, State = JSON |
 ```
@@ -467,20 +502,27 @@ workspace/rooms/{name}/artifacts/
 {
   "room_id": "room-alpha-001",
   "name": "Alpha Team Room",
-  "created_by": "@alice:local",
+  "created_by": "alice:Alice@local",
   "created_at": "2026-03-09T10:00:00Z",
   "membership": {
     "policy": "invite",
     "members": {
-      "@alice:local": "owner",
-      "@bob:local": "member"
+      "alice:Alice@local": "owner",
+      "bob:Bob@local": "member"
     }
   },
   "socialware": {
-    "installed": ["ta"],
+    "installed": [
+      {
+        "app_id": "task-arena",
+        "namespace": "ta",
+        "contract": "task-arena.app.md",
+        "template": "two-role-submit-approve.socialware.md"
+      }
+    ],
     "roles": {
-      "@alice:local": ["ta:poster"],
-      "@bob:local": ["ta:approver"]
+      "ta:R1": "alice:Alice@local",
+      "ta:R2": "bob:Bob@local"
     }
   }
 }

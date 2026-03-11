@@ -36,13 +36,13 @@ Arena（边界）
 
 ---
 
-## 3. 四步开发模型
+## 3. 五步开发模型
 
 ### 3.1 Socialware Dev — 设计契约模板
 
 - **输入**：组织需求描述（自然语言）
 - **输出**：`.socialware.md` 模板文件
-- **工作**：定义四原语（Role / Flow / Commitment / Arena），所有 binding 为 `_待绑定_`
+- **工作**：定义四原语（Role / Flow / Commitment / Arena），§5 Bindings 为 `_待实现_`，§1 Roles Holder 为 `_待绑定_`
 - **存储**：`simulation/contracts/`
 - **性质**：模板是只读产品，可分发、可复用
 
@@ -54,15 +54,25 @@ Arena（边界）
 - **存储**：`workspace/rooms/{name}/`
 - **性质**：Room 是独立于 App 的基础设施
 
-### 3.3 Socialware App Dev — 绑定契约
+### 3.3 Socialware App Dev — 开发契约
 
-- **输入**：模板 + 目标 Room
-- **输出**：`.app.md` 绑定文件 + workspace 配置
-- **工作**：复制模板 → 绑定 Identity 到 Role → 绑定 Tool 到 Action → 填写跨契约引用
-- **存储**：`workspace/rooms/{name}/contracts/{ns}.app.md`
-- **性质**：App 是模板的具体实例
+- **输入**：模板
+- **输出**：`.app.md` 已开发文件
+- **工作**：复制模板 → 绑定 Tool 到 Action → 填写跨契约引用（§5 `_待实现_` → 具体绑定），§1 Roles Holder 保持 `_待绑定_`
+- **存储**：`workspace/app-store/{app-id}.app.md`
+- **性质**：已开发的 App，可安装到任意 Room
+- **状态**：`已开发`
 
-### 3.4 Socialware App Runtime — 文字游戏执行
+### 3.4 Socialware App Install — 安装到 Room
+
+- **输入**：已开发的 App（来自 app-store）+ 目标 Room
+- **输出**：Room 中的 `.app.md` 已安装文件 + 更新 config.json
+- **工作**：从 app-store 复制 → 绑定 Identity 到 Role（§1 `_待绑定_` → 具体身份）→ 注册到 Room
+- **存储**：`workspace/rooms/{name}/contracts/{app-id}.app.md`
+- **性质**：App 安装在 Room 中，可运行
+- **状态**：`已安装`
+
+### 3.5 Socialware App Runtime — 文字游戏执行
 
 - **输入**：已安装的 App + 身份
 - **输出**：Timeline entries（append-only JSONL）
@@ -70,15 +80,17 @@ Arena（边界）
 - **性质**：Timeline 是唯一真相源，State 纯推导
 
 ```
-Socialware Dev    Room Management    Socialware App Dev    Socialware App Runtime
-──────────────    ───────────────    ──────────────────    ──────────────────────
-Design org graph  Create space       Bind context          Execute by contract
-│                │                  │                     │
-│ .socialware.md │ config.json      │ .app.md + workspace │ Timeline grows
-│ (template)     │ state.json       │ (bound + room)      │ State derives
-▼                ▼                  ▼                     ▼
-contracts/       workspace/rooms/   rooms/{name}/         timeline/*.jsonl
+Room Management    Socialware Dev    App Dev              App Install            App Runtime
+───────────────    ──────────────    ──────────────────   ──────────────────     ──────────────────────
+Create space       Design org graph  Bind tools           Bind identities        Execute by contract
+│                 │                 │                    │                      │
+│ config.json     │ .socialware.md  │ .app.md            │ .app.md (installed)  │ Timeline grows
+│ state.json      │ (template)      │ (developed)        │ (bound + room)       │ State derives
+▼                 ▼                 ▼                    ▼                      ▼
+workspace/rooms/  contracts/        workspace/app-store/ rooms/{name}/contracts/ timeline/*.jsonl
 ```
+
+**契约状态流转**：`模板` → `已开发` → `已安装`
 
 ---
 
@@ -130,7 +142,7 @@ Room "alpha"
       "flow": "ew:branch_lifecycle",
       "state": "active",
       "subject_action": "branch.create",
-      "subject_author": "@alice:local",
+      "subject_author": "alice:Alice@local",
       "last_action": "branch.create",
       "last_ref": "msg-001"
     },
@@ -138,7 +150,7 @@ Room "alpha"
       "flow": "ta:task_lifecycle",
       "state": "submitted",
       "subject_action": "task.submit",
-      "subject_author": "@bob:local",
+      "subject_author": "bob:Bob@local",
       "last_action": "task.submit",
       "last_ref": "msg-002"
     },
@@ -146,7 +158,7 @@ Room "alpha"
       "flow": "rp:resource_lifecycle",
       "state": "in_use",
       "subject_action": "resource.request",
-      "subject_author": "@alice:local",
+      "subject_author": "alice:Alice@local",
       "last_action": "resource.allocate",
       "last_ref": "msg-007"
     }
@@ -263,7 +275,7 @@ SwSim 使用共享文件系统模拟 P2P 网络：
 Terminal A                    Terminal B
 ──────────                    ──────────
 Claude Code session           Claude Code session
-Identity: @alice:local        Identity: @bob:local
+Identity: alice:Alice@local    Identity: bob:Bob@local
     │                             │
     └──── 共享文件系统 ────────────┘
           simulation/workspace/
@@ -279,11 +291,11 @@ Identity: @alice:local        Identity: @bob:local
 
 ### 8.2 Single-Session 模式（Fallback）
 
-单个 session 使用 `/switch @entity` 切换身份：
+单个 session 使用 `/switch {username}:{nickname}@{namespace}` 切换身份：
 
 ```
-/switch @alice:local   → 以 Alice 身份操作
-/switch @bob:local     → 以 Bob 身份操作
+/switch alice:Alice@local    → 以 Alice 身份操作
+/switch bob:Bob@local        → 以 Bob 身份操作
 ```
 
 切换时显示「收件箱」—— 自上次切换以来对方发送的消息。
@@ -297,20 +309,19 @@ Identity: @alice:local        Identity: @bob:local
 │                        SwSim Architecture                       │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│   Socialware Dev         App Dev              App Runtime       │
-│   ─────────────         ────────             ──────────────     │
-│   /socialware-dev       /socialware-app-dev  /socialware-app    │
-│        │                     │                    │             │
-│        ▼                     ▼                    ▼             │
-│   .socialware.md        .app.md              Hook Pipeline      │
-│   (template)            (bound)              ┌──────────────┐  │
-│                              │               │ pre_send     │  │
-│                              │               │ execute      │  │
-│                              │               │ after_write  │  │
-│                              │               └──────┬───────┘  │
-│                              │                      │          │
-│                              ▼                      ▼          │
-│                         Room (workspace)       Timeline (JSONL) │
+│   Room             Socialware Dev    App Dev          App Install         App Runtime      │
+│   ────             ─────────────    ────────         ───────────         ──────────────   │
+│   /room            /socialware-dev  /socialware-     /socialware-        /socialware-app  │
+│     │                   │            app-dev          app-install             │           │
+│     ▼                   ▼                │                 │                  ▼           │
+│   config.json      .socialware.md   .app.md           .app.md          Hook Pipeline     │
+│   state.json       (template)       (developed)       (installed)      ┌──────────────┐  │
+│                                          │                 │           │ pre_send     │  │
+│                                          ▼                 │           │ execute      │  │
+│                                     app-store/             │           │ after_write  │  │
+│                                                            ▼           └──────┬───────┘  │
+│                                                       Room (workspace)        │          │
+│                                                                         Timeline (JSONL) │
 │                         ┌──────────────┐      ┌──────────────┐ │
 │                         │ config.json  │      │ append-only  │ │
 │                         │ contracts/   │      │ Lamport clk  │ │
@@ -335,7 +346,8 @@ Identity: @alice:local        Identity: @bob:local
 | 术语 | 定义 |
 |------|------|
 | Socialware | 契约文件（`.socialware.md`），用四原语定义组织 |
-| Socialware App | 绑定后的契约（`.app.md`）+ 运行时 workspace |
+| Socialware App | 开发并安装后的契约（`.app.md`）+ 运行时 workspace |
+| App Store | 已开发但未安装的 App 存储目录（`workspace/app-store/`） |
 | Room | 协作空间，可承载多个 Socialware |
 | Namespace | Socialware 在 Room 中的命名前缀（如 `ew`, `ta`） |
 | Timeline | Append-only JSONL，唯一真相源 |

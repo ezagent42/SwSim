@@ -11,7 +11,7 @@
 
 ### Step 1: 创建 Room
 
-- **操作**：执行 `/room create doc-review`，创建者为 `@alice:local`
+- **操作**：执行 `/room create doc-review`，创建者为 `alice:Alice@local`
 - **前置依赖**：无
 - **验证**：`simulation/workspace/rooms/doc-review/` 目录结构
 - **验收标准**：
@@ -28,10 +28,10 @@
 - **验收标准**：
   - `room_id` 格式为 `room-doc-review-{seq}`
   - `name` 为 `doc-review`
-  - `created_by` 为 `@alice:local`
+  - `created_by` 为 `alice:Alice@local`
   - `created_at` 为有效 ISO 8601
   - `membership.policy` 为 `invite`
-  - `membership.members` 包含 `"@alice:local": "owner"`
+  - `membership.members` 包含 `"alice:Alice@local": "owner"`
   - `socialware.installed` 为空数组 `[]`
   - `socialware.roles` 为空对象 `{}`
 
@@ -49,11 +49,11 @@
 
 ### Step 4: 验证 Identity 文件
 
-- **操作**：检查 `simulation/workspace/identities/@alice.json`
+- **操作**：检查 `simulation/workspace/identities/alice:Alice@local.json`
 - **前置依赖**：Step 1
 - **验证**：Identity 文件存在且格式正确
 - **验收标准**：
-  - `entity_id` 为 `@alice:local`
+  - `entity_id` 为 `alice:Alice@local`
   - `pubkey_sim` 存在
   - `created_at` 为有效 ISO 8601
 
@@ -75,20 +75,20 @@
 - **验证**：详情展示完整
 - **验收标准**：
   - 显示 Room 名称和创建时间
-  - 显示成员列表（仅 @alice:local）
+  - 显示成员列表（仅 alice:Alice@local）
   - 显示已安装 Socialware = 空
   - 显示 Lamport Clock = 0
 
 ### Step 7: 加入 Room
 
-- **操作**：执行 `/room join doc-review @bob:local`（@bob:local 加入）
+- **操作**：执行 `/room join doc-review bob:Bob@local`（bob:Bob@local 加入）
 - **前置依赖**：Step 1
 - **验证**：成员正确添加
 - **验收标准**：
-  - `config.json` 的 `membership.members` 新增 `"@bob:local": "member"`
-  - `simulation/workspace/identities/@bob.json` 存在
-  - `rooms/doc-review/identities/` 下有 @bob 的引用
-  - `state.json` 的 `peer_cursors` 新增 `"@bob:local": 0`
+  - `config.json` 的 `membership.members` 新增 `"bob:Bob@local": "member"`
+  - `simulation/workspace/identities/bob:Bob@local.json` 存在
+  - `rooms/doc-review/identities/` 下有 bob 的引用
+  - `state.json` 的 `peer_cursors` 新增 `"bob:Bob@local": 0`
 
 ### Step 8: 重复创建检测
 
@@ -99,7 +99,7 @@
 
 ### Step 9: 创建第二个 Room
 
-- **操作**：执行 `/room create project-alpha`，创建者 `@alice:local`
+- **操作**：执行 `/room create project-alpha`，创建者 `alice:Alice@local`
 - **前置依赖**：Step 1
 - **验证**：第二个 Room 独立创建
 - **验收标准**：

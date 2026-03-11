@@ -21,7 +21,7 @@
 
 ### Step 2: 触发 Commitment（submit → C1 激活）
 
-- **操作**：@alice 执行 `da:submit`（提交任务）
+- **操作**：alice 执行 `da:submit`（提交任务）
 - **前置依赖**：Step 1
 - **验证**：Commitment 被触发激活
 - **验收标准**：
@@ -42,7 +42,7 @@
 
 ### Step 4: 履行 Commitment（approve → C1 fulfilled）
 
-- **操作**：@bob 在截止时间前执行 `da:approve`
+- **操作**：bob 在截止时间前执行 `da:approve`
 - **前置依赖**：Step 2
 - **验证**：Commitment 被标记为已履行
 - **验收标准**：
@@ -63,7 +63,7 @@
 
 ### Step 6: 违反 Commitment（超时未响应）
 
-- **操作**：@alice 提交新任务，@bob 在模拟超时后仍未审批
+- **操作**：alice 提交新任务，bob 在模拟超时后仍未审批
 - **前置依赖**：Step 1
 - **验证**：Commitment 被标记为已违反
 - **验收标准**：
@@ -74,7 +74,7 @@
 
 ### Step 7: reject 也满足 Commitment
 
-- **操作**：@alice 提交任务，@bob 在截止前 reject（驳回也是一种回复）
+- **操作**：alice 提交任务，bob 在截止前 reject（驳回也是一种回复）
 - **前置依赖**：Step 1
 - **验证**：reject 同样算作 Commitment 履行
 - **验收标准**：

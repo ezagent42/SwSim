@@ -10,7 +10,7 @@
 
 `.socialware.md` 是 Socialware 的**模板契约文件**。它用 Markdown 格式定义一个完整的组织结构——四原语（Role / Flow / Commitment / Arena）及其 Context Bindings。
 
-模板是**只读产品**：创建后不修改，可分发、可复用。App Dev 阶段会复制模板并绑定具体的 Identity 和 Tool，生成 `.app.md`。
+模板是**只读产品**：创建后不修改，可分发、可复用。App Dev 阶段会复制模板并绑定具体的 Tool，生成 `.app.md`（已开发状态）。App Install 阶段再绑定 Identity 到 Role 并安装到 Room。
 
 ---
 
@@ -32,12 +32,10 @@
 ```markdown
 # {Socialware 名称}
 
-> **类型**：Socialware 契约模板
-> **状态**：模板
-> **创建者**：{creator}
-> **日期**：{YYYY-MM-DD}
-> **引用**：{相关文档或规范的链接，可选}
-> **描述**：{一句话描述这个 Socialware 的用途}
+> 状态: 模板
+> 开发者: {username}:{nickname}@{namespace}
+
+{一句话描述}
 ```
 
 ---
@@ -62,7 +60,7 @@
 - **ID**：唯一标识符，格式 `R{n}`（R1, R2, R3...）
 - **名称**：人类可读的角色名（如「提交者」「审批者」「观察者」）
 - **Capabilities**：该角色拥有的能力，用于 CBAC 检查（如 `submit`, `approve`, `view`）
-- **Holder**：模板中始终为 `_待绑定_`，App Dev 阶段绑定为具体 Identity
+- **Holder**：模板中始终为 `_待绑定_`，App Install 阶段绑定为具体 Identity
 
 ### 4.3 Atom 地址
 
@@ -170,10 +168,8 @@ Arena 定义谁可以进入这个组织。
 ```markdown
 ## §4 Arena
 
-| 属性 | 值 |
-|------|-----|
-| 准入策略 | {role_based / anyone / invite_only} |
-| 准入条件 | {具体条件描述} |
+- 进入策略: {role_based / anyone / invite_only}
+- 最小参与者: {number}
 ```
 
 ### 7.2 准入策略类型
@@ -188,38 +184,38 @@ Arena 定义谁可以进入这个组织。
 
 ## 8. §5 Context Bindings — 上下文绑定
 
-Context Bindings 定义每个 action 的执行细节。模板中所有绑定为 `_待绑定_`。
+Context Bindings 定义每个 action 的执行细节。模板中所有绑定为 `_待实现_`。
 
 ### 8.1 格式
 
 ```markdown
 ## §5 Context Bindings
 
-### Action: {flow_name}.{action}
-
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | _待绑定_ |
-| 输入 (Input) | _待绑定_ |
-| 输出 (Output) | _待绑定_ |
-| 消息模板 (Message Template) | _待绑定_ |
-| 依赖 (Requires) | {_待绑定_ 或 _无_} |
-| 委托 (Delegates) | {_待绑定_ 或 _无_} |
-| 资源 (Requests) | {_待绑定_ 或 _无_} |
+### on: {action}
+- 前置: {role} [+ 状态={state}]
+- 工具: _待实现_
+- 输入: _待实现_
+- 输出: _待实现_
+- 消息模板: _待实现_
+- 依赖: _待实现_ 或 _无_
+- 委托: _待实现_ 或 _无_
+- 资源: _待实现_ 或 _无_
 ```
 
-### 8.2 `_待绑定_` vs `_无_` 的关键区分
+### 8.2 `_待实现_` vs `_待绑定_` vs `_无_` 的关键区分
 
 这是模板设计中最重要的区分：
 
 | 值 | 含义 | 场景 |
 |----|------|------|
-| `_待绑定_` | 设计层面存在抽象依赖，App Dev 阶段需要绑定具体引用 | 设计声明了「此 action 依赖另一个 flow 的状态」 |
+| `_待实现_` | §5 Bindings 中的占位符，App Dev 阶段需要绑定具体工具和引用 | 设计声明了「此 action 的工具/依赖需要在开发阶段实现」 |
+| `_待绑定_` | §1 Roles Holder 中的占位符，安装到 Room 时绑定具体 Identity | 设计声明了「此角色的持有者在安装时绑定」 |
 | `_无_` | 完全没有依赖 | 设计层面就不存在任何依赖 |
 
 **示例**：
-- 「审批 action 需要检查提交状态」→ 依赖 (Requires) = `_待绑定_`（有依赖，但具体引用在 App Dev 时绑定）
+- 「审批 action 需要检查提交状态」→ 依赖 (Requires) = `_待实现_`（有依赖，但具体引用在 App Dev 时绑定）
 - 「提交 action 不依赖任何外部状态」→ 依赖 (Requires) = `_无_`（没有依赖）
+- 「提交者角色需要绑定用户」→ Holder = `_待绑定_`（安装到 Room 时绑定具体 Identity）
 
 ### 8.3 引用语法（Reference Syntax）
 
@@ -231,7 +227,7 @@ Context Bindings 定义每个 action 的执行细节。模板中所有绑定为 
 | **Delegates** | `[ns:role](path)` | 角色委托——当前 action 委托另一个角色执行 |
 | **Requests** | `[ns:arena.resource](path)` | 资源请求——当前 action 需要另一个 arena 的资源 |
 
-模板中这些引用全部为 `_待绑定_`，App Dev 时填入具体路径。
+模板中这些引用全部为 `_待实现_`，App Dev 时填入具体路径。
 
 ---
 
@@ -259,11 +255,10 @@ Atom 地址用于：
 ```markdown
 # 双角色提交-审批
 
-> **类型**：Socialware 契约模板
-> **状态**：模板
-> **创建者**：Allen
-> **日期**：2026-03-09
-> **描述**：最简单的双角色工作流——一方提交，一方审批
+> 状态: 模板
+> 开发者: allen:Allen@local
+
+最简单的双角色工作流——一方提交，一方审批
 
 ## §1 Roles
 
@@ -292,58 +287,48 @@ Atom 地址用于：
 
 ## §4 Arena
 
-| 属性 | 值 |
-|------|-----|
-| 准入策略 | role_based |
-| 准入条件 | 必须被分配 R1 或 R2 角色 |
+- 进入策略: role_based
+- 最小参与者: 2
 
 ## §5 Context Bindings
 
-### Action: task_lifecycle.submit
+### on: submit
+- 前置: R1
+- 工具: _待实现_
+- 输入: _待实现_
+- 输出: _待实现_
+- 消息模板: _待实现_
+- 依赖: _无_
+- 委托: _无_
+- 资源: _无_
 
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | _待绑定_ |
-| 输入 (Input) | _待绑定_ |
-| 输出 (Output) | _待绑定_ |
-| 消息模板 (Message Template) | _待绑定_ |
-| 依赖 (Requires) | _无_ |
-| 委托 (Delegates) | _无_ |
-| 资源 (Requests) | _无_ |
+### on: approve
+- 前置: R2
+- 工具: _待实现_
+- 输入: _待实现_
+- 输出: _待实现_
+- 消息模板: _待实现_
+- 依赖: _待实现_
+- 委托: _无_
+- 资源: _无_
 
-### Action: task_lifecycle.approve
+### on: reject
+- 前置: R2
+- 工具: _待实现_
+- 输入: _待实现_
+- 输出: _待实现_
+- 消息模板: _待实现_
+- 依赖: _待实现_
+- 委托: _无_
+- 资源: _无_
 
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | _待绑定_ |
-| 输入 (Input) | _待绑定_ |
-| 输出 (Output) | _待绑定_ |
-| 消息模板 (Message Template) | _待绑定_ |
-| 依赖 (Requires) | _待绑定_ |
-| 委托 (Delegates) | _无_ |
-| 资源 (Requests) | _无_ |
-
-### Action: task_lifecycle.reject
-
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | _待绑定_ |
-| 输入 (Input) | _待绑定_ |
-| 输出 (Output) | _待绑定_ |
-| 消息模板 (Message Template) | _待绑定_ |
-| 依赖 (Requires) | _待绑定_ |
-| 委托 (Delegates) | _无_ |
-| 资源 (Requests) | _无_ |
-
-### Action: task_lifecycle.revise
-
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | _待绑定_ |
-| 输入 (Input) | _待绑定_ |
-| 输出 (Output) | _待绑定_ |
-| 消息模板 (Message Template) | _待绑定_ |
-| 依赖 (Requires) | _无_ |
-| 委托 (Delegates) | _无_ |
-| 资源 (Requests) | _无_ |
+### on: revise
+- 前置: R1 + 状态=rejected
+- 工具: _待实现_
+- 输入: _待实现_
+- 输出: _待实现_
+- 消息模板: _待实现_
+- 依赖: _无_
+- 委托: _无_
+- 资源: _无_
 ```

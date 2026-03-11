@@ -106,8 +106,8 @@ SwSim 支持五种工具类型：
 ### 3.1 示例
 
 ```
-@alice:local                         @bob:local
-─────────────                        ────────────
+alice:Alice@local                    bob:Bob@local
+────────────────                     ─────────────
 ta:submit 绑定:                      ta:submit 绑定:
   Tool: mcp: elfiee/create_task        Tool: manual
   (Alice 有 elfiee MCP server)         (Bob 没有，手动输入)
@@ -119,8 +119,8 @@ ta:approve 绑定:                     ta:approve 绑定:
 
 ### 3.2 规则
 
-- **结果可见**：@bob 可以看到 @alice 的工具产出的消息和 artifacts
-- **工具不可用**：@bob 不能执行 @alice 专有的 MCP 工具
+- **结果可见**：bob 可以看到 alice 的工具产出的消息和 artifacts
+- **工具不可用**：bob 不能执行 alice 专有的 MCP 工具
 - **契约一致**：状态转换规则对所有 peer 一致
 - **类比**：就像 Git——你可以用 VS Code，我可以用 Vim，但 commit 格式是一致的
 
@@ -297,7 +297,7 @@ echo "测试完成，报告已保存到 $2/test-report.txt"
     │
     ▼
 pre_send 检查:
-├── Role Check: @alice 是否持有 R1? ✓
+├── Role Check: alice 是否持有 R1? ✓
 ├── CBAC Check: any → 通过 ✓
 ├── Flow Check: _none_ → submit → submitted ✓
 └── Cross-NS Check: 无依赖 ✓
@@ -315,5 +315,5 @@ after_write:
 ├── Append Ref → timeline/shard-001.jsonl
 ├── Update State: flow_states["msg-001"] = { flow: "ta:task_lifecycle", state: "submitted" }
 ├── Update Commitments: ta:C1 → active (deadline: 48h)
-└── Broadcast: 通知 @bob 有新消息
+└── Broadcast: 通知 bob 有新消息
 ```

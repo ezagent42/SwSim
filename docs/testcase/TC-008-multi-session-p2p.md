@@ -14,17 +14,23 @@
 
 - **操作**：在 SwSim 项目根目录执行：
   ```bash
-  .claude/skills/socialware-app/scripts/start-p2p.sh doc-review @alice @bob
+  .claude/skills/socialware-app/scripts/start-p2p.sh doc-review alice:Alice@local bob:Bob@local
+  ```
+  如果 session 已存在，使用 `--force` 重建：
+  ```bash
+  .claude/skills/socialware-app/scripts/start-p2p.sh --force doc-review alice:Alice@local bob:Bob@local
   ```
 - **前置依赖**：TC-003 已完成（App 已安装到 Room）
-- **验证**：tmux session 创建，两个 pane 各自自动启动 Claude Code
+- **验证**：tmux session 创建，4 个 pane（2 peer + 2 watcher）
 - **验收标准**：
   - tmux session 名称为 `swsim-doc-review`
-  - 2 个 pane，各自运行独立的 Claude Code 会话
-  - 左侧 pane：`@alice` 自动执行 `/socialware-app room=doc-review identity=@alice`
-  - 右侧 pane：`@bob` 自动执行 `/socialware-app room=doc-review identity=@bob`
-  - 两个 pane 各自显示启动面板（角色、可用操作）
+  - 4 个 pane：2 个 peer pane + 2 个 watcher pane（每个 identity 占 2 个 pane）
+  - 左上 pane：alice 的 Claude Code 会话，自动执行 `/socialware-app room=doc-review identity=alice:Alice@local`
+  - 右上 pane：bob 的 Claude Code 会话，自动执行 `/socialware-app room=doc-review identity=bob:Bob@local`
+  - 左下 pane：alice 的 watcher（`watch-timeline.sh`，过滤自己消息）
+  - 右下 pane：bob 的 watcher
   - 用 `Ctrl-b + 方向键` 切换 pane
+  - 不加 `--force` 再次运行会 attach 到已有 session（不重建）
 
 ### Step 2: 验证两个 session 独立
 
@@ -32,8 +38,8 @@
 - **前置依赖**：Step 1
 - **验证**：各 session 身份独立
 - **验收标准**：
-  - Alice pane：显示 @alice:local 的角色（如 da:R1/提交者）
-  - Bob pane：显示 @bob:local 的角色（如 da:R2/审批者）
+  - Alice pane：显示 alice:Alice@local 的角色（如 da:R1/提交者）
+  - Bob pane：显示 bob:Bob@local 的角色（如 da:R2/审批者）
   - 两个 session 读取的是同一个 Room 的 config.json
 
 ### Step 3: Alice 提交任务
@@ -52,7 +58,7 @@
 - **前置依赖**：Step 3
 - **验证**：Bob 能读取到 Alice 写入的消息
 - **验收标准**：
-  - Bob 读取 Timeline 中 clock > `peer_cursors["@bob:local"]` 的 entries
+  - Bob 读取 Timeline 中 clock > `peer_cursors["bob:Bob@local"]` 的 entries
   - 显示 Alice 的提交消息
   - Bob 的 peer_cursor 更新
 
@@ -88,7 +94,7 @@
 - **验收标准**：
   - 收件箱显示 Bob 的审批消息
   - `/status` 显示 msg-001 = approved
-  - `peer_cursors["@alice:local"]` 更新
+  - `peer_cursors["alice:Alice@local"]` 更新
 
 ### Step 8: 并发写入安全
 
@@ -121,7 +127,7 @@
   - Bob 关闭期间 Alice 的操作正常写入
   - Bob 重新启动 `/socialware-app` 后
   - 收件箱显示所有 Bob 离线期间的消息
-  - `peer_cursors["@bob:local"]` 仍是断开前的值
+  - `peer_cursors["bob:Bob@local"]` 仍是断开前的值
   - Bob 操作后 cursor 正确更新
 
 ### Step 11: 清理

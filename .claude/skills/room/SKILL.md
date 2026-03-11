@@ -1,9 +1,13 @@
 ---
 name: room
-description: "Create, list, and manage Rooms — collaboration spaces that host Socialware Apps. Use before /socialware-app-dev to choose or create a target Room."
+description: "Create, list, and manage Rooms — collaboration spaces that host Socialware Apps. Use before /socialware-app-install to install an App."
 ---
 
 # Room — 协作空间管理
+
+## 启动前置
+
+如果存在 `simulation/workspace/.active-session.json`，删除它（退出 runtime 模式）。
 
 ## 你在管理什么
 
@@ -30,18 +34,18 @@ Room ≠ App。Room 是空间，App 是空间中可运行的指令集。一个 R
    ├── artifacts/
    └── state.json     # 初始状态
    ```
-3. 询问 Room 创建者身份，提示格式为 `@entity:local`（如 `@alice:local`）
+3. 询问 Room 创建者身份，提示格式为 `{username}:{nickname}@{namespace}`（如 `alice:Alice@local`）
 4. 生成初始 config.json:
    ```json
    {
      "room_id": "room-{name}-001",
      "name": "{Name}",
-     "created_by": "@{entity}:local",
+     "created_by": "{username}:{nickname}@{namespace}",
      "created_at": "{ISO8601}",
      "membership": {
        "policy": "invite",
        "members": {
-         "@{entity}:local": "owner"
+         "{username}:{nickname}@{namespace}": "owner"
        }
      },
      "socialware": {
@@ -50,25 +54,27 @@ Room ≠ App。Room 是空间，App 是空间中可运行的指令集。一个 R
      }
    }
    ```
-5. 生成空 state.json:
+5. 生成空 state.json（注意：为 owner 初始化 `peer_cursors`）:
    ```json
    {
      "flow_states": {},
      "role_map": {},
      "commitments": {},
      "last_clock": 0,
-     "peer_cursors": {}
+     "peer_cursors": {
+       "{username}:{nickname}@{namespace}": 0
+     }
    }
    ```
-6. 如果创建者的 identity 文件不存在，创建 `simulation/workspace/identities/@{entity}.json`：
+6. 如果创建者的 identity 文件不存在，创建 `simulation/workspace/identities/{username}@{namespace}.json`：
    ```json
    {
-     "entity_id": "@{entity}:local",
+     "entity_id": "{username}:{nickname}@{namespace}",
      "pubkey_sim": "sim:placeholder",
      "created_at": "{ISO8601}"
    }
    ```
-7. 在 `simulation/workspace/rooms/{name}/identities/` 创建成员引用 `@{entity}.json`（与全局 identity 相同内容）
+7. 在 `simulation/workspace/rooms/{name}/identities/` 创建成员引用 `{username}@{namespace}.json`（与全局 identity 相同内容）
 
 ### `/room list`
 
@@ -80,7 +86,7 @@ Room ≠ App。Room 是空间，App 是空间中可运行的指令集。一个 R
    ```
    | Room | 成员 | 已安装 Socialware | 消息数 | 最后活动 |
    |------|------|-------------------|--------|---------|
-   | project-alpha | @alice, @bob | ew, ta, rp | 42 | 2026-03-09 |
+   | project-alpha | alice, bob | ew, ta, rp | 42 | 2026-03-09 |
    ```
 
 ### `/room show {name}`
@@ -89,19 +95,19 @@ Room ≠ App。Room 是空间，App 是空间中可运行的指令集。一个 R
 
 1. 读取 config.json
 2. 读取 state.json（概要）
-3. 列出已安装的 Socialware（namespace + 契约文件）
+3. 列出已安装的 Socialware（app-id + namespace + 契约文件）
 4. 列出成员和角色
 5. 展示 Timeline 统计（消息数, 最后 clock）
 
-### `/room join {name} @{entity}`
+### `/room join {name} {username}:{nickname}@{namespace}`
 
 将成员加入 Room:
 
 1. 检查 Room 是否存在
-2. 检查 `simulation/workspace/identities/@{entity}.json` 是否存在，不存在则创建（格式同 create 步骤 6）
-3. 将 identity 添加到 config.json 的 `membership.members`：`"@{entity}:local": "member"`
-4. 在 `simulation/workspace/rooms/{name}/identities/` 创建成员引用 `@{entity}.json`（与全局 identity 相同内容）
-5. 在 state.json 的 `peer_cursors` 中初始化：`"@{entity}:local": 0`
+2. 检查 `simulation/workspace/identities/{username}@{namespace}.json` 是否存在，不存在则创建（格式同 create 步骤 6）
+3. 将 identity 添加到 config.json 的 `membership.members`：`"{username}:{nickname}@{namespace}": "member"`
+4. 在 `simulation/workspace/rooms/{name}/identities/` 创建成员引用 `{username}@{namespace}.json`（与全局 identity 相同内容）
+5. 在 state.json 的 `peer_cursors` 中初始化：`"{username}:{nickname}@{namespace}": 0`
 
 ## 参考
 
@@ -109,11 +115,16 @@ Room ≠ App。Room 是空间，App 是空间中可运行的指令集。一个 R
 
 ## 完成提示
 
-Room 创建/加入完成后，提示用户下一步：
+Room 创建/加入完成后，根据当前状态提示用户下一步：
 
-> Room 已就绪。下一步可以用 `/socialware-app-dev` 基于已有的 Socialware 模板开发 App，安装到此 Room 中。
+- **如果 `simulation/contracts/` 中无模板** → 提示：
+  > Room 已就绪。下一步用 `/socialware-dev` 设计一个 Socialware 模板。
+- **如果有模板但 `simulation/workspace/app-store/` 中无 App** → 提示：
+  > Room 已就绪。下一步用 `/socialware-app-dev` 基于模板开发 App。
+- **如果 app-store 中有已开发的 App** → 提示：
+  > Room 已就绪。下一步用 `/socialware-app-install` 将已开发的 App 安装到此 Room 中。
 
-**注意措辞**：不要说"将模板绑定到 Room"。正确说法是"基于模板开发 App，安装到 Room"。模板是只读的蓝图，App 是新生成的可运行实例。
+**完整流程参考**: `/room` → `/socialware-dev` → `/socialware-app-dev` → `/socialware-app-install` → `/socialware-app`
 
 ## 关键原则
 
@@ -121,3 +132,4 @@ Room 创建/加入完成后，提示用户下一步：
 - **Room 可以为空**: 没有安装任何 Socialware 的 Room 就是一个空协作空间
 - **一个 Room 多个 Socialware**: 通过 namespace 区分
 - **成员管理**: Room 有自己的成员列表，Socialware 的 Role 是在成员之上的应用层权限
+- **身份格式**: `{username}:{nickname}@{namespace}`（如 `alice:Alice@local`），无 `@` 前缀
