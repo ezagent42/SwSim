@@ -9,7 +9,7 @@ description: "Run an installed Socialware contract — text-game runtime with pe
 
 1. 如果存在 `simulation/workspace/.active-session.json`，删除它（清除旧 session）。
 2. **身份确认**: 扫描 `simulation/workspace/identities/*.json`，列出可用身份。
-   - 如果无身份 → 提示用户先用 `/room create` 创建身份。
+   - 如果无身份或无 Room → 提示：先用 `/room create` 创建身份和 Room，然后用 `/socialware-dev` 设计模板（`.socialware.md`），再 `/socialware-app-dev` 开发 App，最后 `/socialware-app-install` 安装。
    - 如果有身份 → 让用户选择以哪个身份操作。
    - **该身份必须是目标 Room 的成员**（启动时验证 config.json membership）。
 3. 创建 `simulation/workspace/.active-session.json`（启用 inbox hook）:
@@ -71,7 +71,7 @@ pane 之间通过共享文件系统通信：Alice 写入 timeline → Bob 的 wa
 1. 询问用户: 进入哪个 Room？以哪个身份？（多会话模式下可从环境变量 `SWSIM_ROOM` 和 `SWSIM_IDENTITY` 读取）
 2. 读取 `simulation/workspace/rooms/{room}/config.json`
 3. 确认身份在 Room 成员列表中
-4. 读取所有已安装的 `contracts/*.app.md`
+4. 读取所有已安装的 `socialware-app/*.app.md`
 5. 加载 state.json（不存在则从 timeline 重建）
 6. **创建 `.active-session.json`**（启用 UserPromptSubmit hook 的 inbox 检查）
 7. 打印启动面板:
@@ -95,7 +95,7 @@ pane 之间通过共享文件系统通信：Alice 写入 timeline → Bob 的 wa
 用户输入 → 解析为 {namespace}:{action}
   │
   [pre_send]
-  ├─ 角色检查: config.json → socialware.roles
+  ├─ 角色检查: config.json → socialware-app.roles
   ├─ 能力约束(CBAC): any → 通过; author → 沿 reply_to 链回溯, 比对 author
   ├─ Flow 检查: state.json → flow_states
   ├─ 跨 namespace: 同 state.json 内不同 namespace 的 flow_states

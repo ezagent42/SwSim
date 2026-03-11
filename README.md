@@ -49,7 +49,7 @@ Template (.socialware.md) + Identity bindings + Tool bindings = Runnable App (.a
 ### 4. `/socialware-app-install` — 安装 App 到 Room（绑用户）
 
 - 输入：app-store 中的已开发 App + 目标 Room
-- 输出：`rooms/{room}/contracts/{app-id}.app.md`（已安装，§1 已填持有者）
+- 输出：`rooms/{room}/socialware-app/{app-id}.app.md`（已安装，§1 已填持有者）
 - 工作内容：选择 namespace，绑定 Identity 到 Role，安装到 Room
 
 ### 5. `/socialware-app` — 文字游戏运行时
@@ -103,7 +103,7 @@ SwSim/
 │       └── rooms/
 │           └── {room_name}/
 │               ├── identities/   # Room members
-│               ├── contracts/    # Installed apps (.app.md)
+│               ├── socialware-app/ # Installed apps (.app.md)
 │               ├── config.json
 │               ├── timeline/
 │               ├── content/
@@ -144,7 +144,7 @@ SwSim/
 /socialware-app-install
 ```
 
-从 app-store 选择已开发 App，选择目标 Room，绑定 Identity 到 Role，安装到 Room 的 `contracts/` 目录。
+从 app-store 选择已开发 App，选择目标 Room，绑定 Identity 到 Role，安装到 Room 的 `socialware-app/` 目录。
 
 ### 第五步：运行
 

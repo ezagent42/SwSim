@@ -22,7 +22,7 @@ socialware-dev skill §3 引导要求承诺必须具体可衡量：`{动作} + {
 四阶段流转：
 - socialware-dev → socialware/ (.socialware.md, §5=_待实现_)
 - socialware-app-dev → app-store/ (.app.md, §5=已填工具, §1=_待绑定_)
-- socialware-app-install → rooms/{room}/contracts/ (.app.md, §1=已填, namespace=已定)
+- socialware-app-install → rooms/{room}/socialware-app/ (.app.md, §1=已填, namespace=已定)
 - socialware-app → runtime (timeline+state)
 
 新增 `simulation/app-store/` 目录和 `socialware-app-install` skill。

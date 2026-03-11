@@ -99,7 +99,7 @@
 
 ### Step 8: 验证安装到 Room 的 .app.md
 
-- **操作**：读取 `workspace/rooms/doc-review/contracts/doc-audit.alice.two-role-submit-approve.app.md`
+- **操作**：读取 `workspace/rooms/doc-review/socialware-app/doc-audit.alice.two-role-submit-approve.app.md`
 - **前置依赖**：Step 7
 - **验证**：文件格式和内容完整
 - **验收标准**：
@@ -119,9 +119,9 @@
 - **前置依赖**：Step 8
 - **验证**：Socialware 注册信息
 - **验收标准**：
-  - `socialware.installed` 包含 `{"app_id": "doc-audit.alice.two-role-submit-approve", "namespace": "da", "contract": "doc-audit.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}`
-  - `socialware.roles` 中包含 `"da:R1": "alice:Alice@local"`（或对应 R-ID）
-  - `socialware.roles` 中包含 `"da:R2": "bob:Bob@local"`（或对应 R-ID）
+  - `socialware-app.installed` 包含 `{"app_id": "doc-audit.alice.two-role-submit-approve", "namespace": "da", "contract": "doc-audit.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}`
+  - `socialware-app.roles` 中包含 `"da:R1": "alice:Alice@local"`（或对应 R-ID）
+  - `socialware-app.roles` 中包含 `"da:R2": "bob:Bob@local"`（或对应 R-ID）
 
 ### Step 10: 验证 state.json 更新
 
@@ -153,5 +153,5 @@
 - **验收标准**：
   - 模板（`.socialware.md`）状态为「模板」（位于 `simulation/socialware/`）
   - app-store 中的 App（`app-store/doc-audit.alice.two-role-submit-approve.app.md`）状态为「已开发」，已注册到 `registry.json`
-  - Room 中的 App（`contracts/doc-audit.alice.two-role-submit-approve.app.md`）状态为「已安装」
+  - Room 中的 App（`socialware-app/doc-audit.alice.two-role-submit-approve.app.md`）状态为「已安装」
   - 三态流转：模板 → 已开发（+ registry 注册） → 已安装

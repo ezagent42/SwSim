@@ -87,7 +87,7 @@ simulation/workspace/
       "bob:Bob@local": "member"
     }
   },
-  "socialware": {
+  "socialware-app": {
     "installed": [
       {
         "app_id": "eng-flow.alice.engineering-workflow",
@@ -115,8 +115,8 @@ simulation/workspace/
 字段说明:
 - `membership.policy`: `open` | `knock` | `invite`（映射 Arena §4）
 - `membership.members`: entity → room role（`owner` | `admin` | `member`）
-- `socialware.installed`: 已安装 App 的对象数组（app_id + namespace + contract 文件名 + 模板来源）
-- `socialware.roles`: `{ns}:{R-ID}` → entity 映射（如 `"ew:R1": "alice:Alice@local"`）
+- `socialware-app.installed`: 已安装 App 的对象数组（app_id + namespace + contract 文件名 + 模板来源）
+- `socialware-app.roles`: `{ns}:{R-ID}` → entity 映射（如 `"ew:R1": "alice:Alice@local"`）
 
 ## Ref（Timeline 条目）
 
@@ -242,7 +242,7 @@ Flow 实例关联规则:
 - `flow_states`: flow instance ID (= subject Ref 的 ref_id) → 当前状态
   - `flow`: namespace:flow_name 格式（跨 namespace 可区分）
   - `subject_author`: Flow 创建者（用于 CBAC 验证）
-- `role_map`: `{ns}:{R-ID}` → entity 映射，从 config.json 的 `socialware.roles` 复制（不随 timeline 变化）
+- `role_map`: `{ns}:{R-ID}` → entity 映射，从 config.json 的 `socialware-app.roles` 复制（不随 timeline 变化）
 - `commitments`: namespace:commitment_id → 状态（`inactive` | `active` | `fulfilled` | `violated`）
 - `last_clock`: 当前最大 Lamport clock
 - `peer_cursors`: 每个 identity 上次"在线"时见过的最大 clock

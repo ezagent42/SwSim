@@ -150,7 +150,7 @@ Skill 引导你完成：
 1. 选择已开发 App（通过 `simulation/app-store/registry.json` 查询，从 `simulation/app-store/` 中选）
 2. 选择目标 Room
 3. 绑定 Role → Identity（你是谁，队友是谁）
-4. 安装到 Room（生成 `rooms/{room}/contracts/{AppName}.{DeveloperName}.{SocialwareName}.app.md`，状态：已安装）
+4. 安装到 Room（生成 `rooms/{room}/socialware-app/{AppName}.{DeveloperName}.{SocialwareName}.app.md`，状态：已安装）
 
 ### 5.3 绑定示例
 
@@ -258,10 +258,10 @@ ew:merge.execute 绑定:                ew:merge.execute 绑定:
 
 ```
 alice:Alice@local 的 workspace:
-  rooms/my-project/contracts/ew.alice.event-weaver.app.md  → §5 绑定 bash/api
+  rooms/my-project/socialware-app/ew.alice.event-weaver.app.md  → §5 绑定 bash/api
 
 bob:Bob@local 的 workspace:
-  rooms/my-project/contracts/ew.alice.event-weaver.app.md  → §5 绑定 manual
+  rooms/my-project/socialware-app/ew.alice.event-weaver.app.md  → §5 绑定 manual
 ```
 
 在 SwSim 模拟环境（共享文件系统）中，两个 peer 使用同一份 `.app.md`——此时以 §5 中更通用的绑定（通常是 `manual`）为准，或者在 §5 中标注 peer-specific 绑定。

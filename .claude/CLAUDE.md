@@ -34,7 +34,7 @@ room  →  socialware-dev  →  socialware-app-dev  →  socialware-app-install 
 创建空间    模板设计            App 开发                App 安装到 Room            运行时
 创建身份    需要身份(开发者)     需要身份(开发者)         需要身份(安装者)+Room成员   需要身份+Room成员
 
-socialware/           app-store/                rooms/{room}/contracts/     runtime
+socialware/           app-store/                rooms/{room}/socialware-app/ runtime
 {name}.socialware.md  {app-id}.app.md           {app-id}.app.md            timeline+state
                       + registry.json
 
@@ -64,7 +64,7 @@ socialware/           app-store/                rooms/{room}/contracts/     runt
 
 1. Template files in `simulation/socialware/` are **READ-ONLY** after creation
 2. App Dev copies template to `simulation/app-store/{app-id}.app.md`, fills §5 tools, and registers in `simulation/app-store/registry.json`
-3. App Install copies from app-store to `workspace/rooms/{room}/contracts/` and fills §1 holders
+3. App Install copies from app-store to `workspace/rooms/{room}/socialware-app/` and fills §1 holders
 4. Timeline is **append-only** — never edit or delete entries
 5. State is always rebuildable from Timeline (`/rebuild`)
 6. Use Chinese for documentation, English for variable names and code
@@ -76,7 +76,7 @@ socialware/           app-store/                rooms/{room}/contracts/     runt
 | `/socialware-dev` | 设计组织 → 模板 | `.socialware.md` |
 | `/room` | 创建/列表/管理 Room | Room 目录 + config.json |
 | `/socialware-app-dev` | 开发 App（填工具） | `app-store/{app-id}.app.md` |
-| `/socialware-app-install` | 安装 App 到 Room（绑用户） | `rooms/{room}/contracts/` |
+| `/socialware-app-install` | 安装 App 到 Room（绑用户） | `rooms/{room}/socialware-app/` |
 | `/socialware-app` | 运行 App（文字游戏运行时） | Timeline entries |
 
 ## P2P Simulation
@@ -93,7 +93,7 @@ Room 可以承载多个 Socialware App，每个 App 提供一个 namespace：
 
 ```
 Room "alpha"/
-├── contracts/
+├── socialware-app/
 │   ├── task-assignment.app.md  (namespace: ta)
 │   └── standup.app.md          (namespace: su)
 ├── state.json          (合并所有 namespace 的状态)

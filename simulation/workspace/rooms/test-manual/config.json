@@ -1,0 +1,26 @@
+{
+  "room_id": "room-test-manual-001",
+  "name": "Test-Manual",
+  "created_by": "alice:Alice@local",
+  "created_at": "2026-03-11T00:00:00.000Z",
+  "membership": {
+    "policy": "invite",
+    "members": {
+      "alice:Alice@local": "owner"
+    }
+  },
+  "socialware-app": {
+    "installed": [
+      {
+        "app_id": "doc-review.alice.trsa",
+        "namespace": "dc",
+        "contract": "doc-review.alice.trsa.app.md",
+        "template": "trsa.socialware.md"
+      }
+    ],
+    "roles": {
+      "dc:R1": "alice:Alice@local",
+      "dc:R2": "alice:Alice@local"
+    }
+  }
+}

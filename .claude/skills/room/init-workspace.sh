@@ -6,7 +6,7 @@
 #
 # 创建:
 #   simulation/workspace/rooms/<name>/identities/
-#   simulation/workspace/rooms/<name>/contracts/
+#   simulation/workspace/rooms/<name>/socialware-app/
 #   simulation/workspace/rooms/<name>/config.json
 #   simulation/workspace/rooms/<name>/timeline/shard-001.jsonl
 #   simulation/workspace/rooms/<name>/content/
@@ -29,7 +29,7 @@ fi
 # 创建目录结构
 mkdir -p "${WORKSPACE}/identities"
 mkdir -p "${ROOM_DIR}/identities"
-mkdir -p "${ROOM_DIR}/contracts"
+mkdir -p "${ROOM_DIR}/socialware-app"
 mkdir -p "${ROOM_DIR}/timeline"
 mkdir -p "${ROOM_DIR}/content"
 mkdir -p "${ROOM_DIR}/artifacts"

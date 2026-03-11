@@ -9,14 +9,14 @@
 示例:
     python rebuild-state.py simulation/workspace/rooms/project-alpha
 
-    # 指定契约目录（默认读取 room_dir/contracts/）
+    # 指定契约目录（默认读取 room_dir/socialware-app/）
     python rebuild-state.py simulation/workspace/rooms/project-alpha \
-        simulation/workspace/rooms/project-alpha/contracts
+        simulation/workspace/rooms/project-alpha/socialware-app
 
 输入:
     - room_dir/timeline/*.jsonl   — Ref 序列
     - room_dir/config.json        — Room Config（读取 role_map + installed namespaces）
-    - room_dir/contracts/*.app.md — 已安装的契约文件（读取 Flow 转换表和 Commitment）
+    - room_dir/socialware-app/*.app.md — 已安装的契约文件（读取 Flow 转换表和 Commitment）
 
 输出:
     - room_dir/state.json         — 重建的 State Cache
@@ -201,7 +201,7 @@ def rebuild_state(room_dir: Path, contract_dir: Path | None = None) -> dict[str,
     支持多 namespace：读取 Room 中所有已安装的 .app.md 契约文件。
     """
     if contract_dir is None:
-        contract_dir = room_dir / "contracts"
+        contract_dir = room_dir / "socialware-app"
 
     # 读取 config.json
     config_path = room_dir / "config.json"
@@ -210,8 +210,8 @@ def rebuild_state(room_dir: Path, contract_dir: Path | None = None) -> dict[str,
     ns_for_contract: dict[str, str] = {}  # contract filename → namespace
     if config_path.exists():
         config = json.loads(config_path.read_text(encoding="utf-8"))
-        role_map = config.get("socialware", {}).get("roles", {})
-        installed_items = config.get("socialware", {}).get("installed", [])
+        role_map = config.get("socialware-app", {}).get("roles", {})
+        installed_items = config.get("socialware-app", {}).get("installed", [])
         for item in installed_items:
             if isinstance(item, dict) and "contract" in item and "namespace" in item:
                 ns_for_contract[item["contract"]] = item["namespace"]

@@ -109,7 +109,7 @@
 - **前置依赖**：Step 1
 - **验证**：脚本输出与 /rebuild 命令结果一致
 - **验收标准**：
-  - 脚本正确读取所有 `contracts/*.app.md`（文件名格式为 `{AppName}.{DeveloperName}.{SocialwareName}.app.md`）
+  - 脚本正确读取所有 `socialware-app/*.app.md`（文件名格式为 `{AppName}.{DeveloperName}.{SocialwareName}.app.md`）
   - 脚本正确解析 `timeline/*.jsonl`
   - 脚本按 clock 排序重放
   - 输出的 state.json 与 /rebuild 命令结果完全一致

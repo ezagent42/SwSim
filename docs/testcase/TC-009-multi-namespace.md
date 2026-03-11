@@ -26,9 +26,9 @@
 - **验收标准**：
   - `app-store/task-arena.alice.two-role-submit-approve.app.md` 存在（已开发，文件名 = `{AppName}.{DeveloperName}.{SocialwareName}.app.md`）
   - `simulation/app-store/registry.json` 中已注册该 App
-  - `contracts/task-arena.alice.two-role-submit-approve.app.md` 存在（已安装）
-  - `config.json` 的 `socialware.installed` 包含 `{"app_id": "task-arena.alice.two-role-submit-approve", "namespace": "ta", "contract": "task-arena.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}`
-  - `socialware.roles` 中 alice 包含 ta 角色，bob 包含 ta 角色
+  - `socialware-app/task-arena.alice.two-role-submit-approve.app.md` 存在（已安装）
+  - `config.json` 的 `socialware-app.installed` 包含 `{"app_id": "task-arena.alice.two-role-submit-approve", "namespace": "ta", "contract": "task-arena.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}`
+  - `socialware-app.roles` 中 alice 包含 ta 角色，bob 包含 ta 角色
 
 ### Step 3: 开发并安装第二个 App (ew)
 
@@ -36,9 +36,9 @@
 - **前置依赖**：Step 1，模板存在（位于 `simulation/socialware/`）
 - **验证**：App 安装成功，已注册到 registry
 - **验收标准**：
-  - `contracts/evt-weave.alice.event-weaver.app.md` 存在
-  - `socialware.installed` 变为 `[{"app_id": "task-arena.alice.two-role-submit-approve", "namespace": "ta", "contract": "task-arena.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}, {"app_id": "evt-weave.alice.event-weaver", "namespace": "ew", "contract": "evt-weave.alice.event-weaver.app.md", "template": "event-weaver.socialware.md"}]`
-  - `socialware.roles` 中角色列表**累加**（不覆盖 ta 的角色）
+  - `socialware-app/evt-weave.alice.event-weaver.app.md` 存在
+  - `socialware-app.installed` 变为 `[{"app_id": "task-arena.alice.two-role-submit-approve", "namespace": "ta", "contract": "task-arena.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}, {"app_id": "evt-weave.alice.event-weaver", "namespace": "ew", "contract": "evt-weave.alice.event-weaver.app.md", "template": "event-weaver.socialware.md"}]`
+  - `socialware-app.roles` 中角色列表**累加**（不覆盖 ta 的角色）
 
 ### Step 4: 开发并安装第三个 App (rp)
 
@@ -46,9 +46,9 @@
 - **前置依赖**：Step 1，模板存在（位于 `simulation/socialware/`）
 - **验证**：App 安装成功，已注册到 registry
 - **验收标准**：
-  - `contracts/res-pool.alice.resource-pool.app.md` 存在
-  - `socialware.installed` 变为 `[{"app_id": "task-arena.alice.two-role-submit-approve", "namespace": "ta", "contract": "task-arena.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}, {"app_id": "evt-weave.alice.event-weaver", "namespace": "ew", "contract": "evt-weave.alice.event-weaver.app.md", "template": "event-weaver.socialware.md"}, {"app_id": "res-pool.alice.resource-pool", "namespace": "rp", "contract": "res-pool.alice.resource-pool.app.md", "template": "resource-pool.socialware.md"}]`
-  - `socialware.roles` 中角色列表再次**累加**
+  - `socialware-app/res-pool.alice.resource-pool.app.md` 存在
+  - `socialware-app.installed` 变为 `[{"app_id": "task-arena.alice.two-role-submit-approve", "namespace": "ta", "contract": "task-arena.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}, {"app_id": "evt-weave.alice.event-weaver", "namespace": "ew", "contract": "evt-weave.alice.event-weaver.app.md", "template": "event-weaver.socialware.md"}, {"app_id": "res-pool.alice.resource-pool", "namespace": "rp", "contract": "res-pool.alice.resource-pool.app.md", "template": "resource-pool.socialware.md"}]`
+  - `socialware-app.roles` 中角色列表再次**累加**
 
 ### Step 5: 验证 config.json 多 namespace 状态
 
@@ -56,8 +56,8 @@
 - **前置依赖**：Step 4
 - **验证**：三个 namespace 共存
 - **验收标准**：
-  - `socialware.installed` = `[{"app_id": "task-arena.alice.two-role-submit-approve", "namespace": "ta", "contract": "task-arena.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}, {"app_id": "evt-weave.alice.event-weaver", "namespace": "ew", "contract": "evt-weave.alice.event-weaver.app.md", "template": "event-weaver.socialware.md"}, {"app_id": "res-pool.alice.resource-pool", "namespace": "rp", "contract": "res-pool.alice.resource-pool.app.md", "template": "resource-pool.socialware.md"}]`
-  - `socialware.roles` 中包含 ta、ew、rp 前缀的 R-ID 键（如 `"ta:R1"`, `"ew:R1"`, `"rp:R1"` 等），值为 `alice:Alice@local` 或 `bob:Bob@local`
+  - `socialware-app.installed` = `[{"app_id": "task-arena.alice.two-role-submit-approve", "namespace": "ta", "contract": "task-arena.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}, {"app_id": "evt-weave.alice.event-weaver", "namespace": "ew", "contract": "evt-weave.alice.event-weaver.app.md", "template": "event-weaver.socialware.md"}, {"app_id": "res-pool.alice.resource-pool", "namespace": "rp", "contract": "res-pool.alice.resource-pool.app.md", "template": "resource-pool.socialware.md"}]`
+  - `socialware-app.roles` 中包含 ta、ew、rp 前缀的 R-ID 键（如 `"ta:R1"`, `"ew:R1"`, `"rp:R1"` 等），值为 `alice:Alice@local` 或 `bob:Bob@local`
   - 角色格式为 `{ns}:{R-ID}`（如 `"ta:R1": "alice:Alice@local"`）
 
 ### Step 6: 运行 ta namespace 操作
@@ -121,7 +121,7 @@
 - **验收标准**：
   - `app-store/task-arena-v2.bob.two-role-submit-approve.app.md` 存在（已开发，文件名 = `{AppName}.{DeveloperName}.{SocialwareName}.app.md`）
   - `simulation/app-store/registry.json` 中同时包含 `task-arena.alice.two-role-submit-approve` 和 `task-arena-v2.bob.two-role-submit-approve` 两个条目
-  - `contracts/task-arena-v2.bob.two-role-submit-approve.app.md` 存在（已安装）
-  - `socialware.installed` 包含 `{"app_id": "task-arena.alice.two-role-submit-approve", ...}` 和 `{"app_id": "task-arena-v2.bob.two-role-submit-approve", "namespace": "ta2", "contract": "task-arena-v2.bob.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}`
+  - `socialware-app/task-arena-v2.bob.two-role-submit-approve.app.md` 存在（已安装）
+  - `socialware-app.installed` 包含 `{"app_id": "task-arena.alice.two-role-submit-approve", ...}` 和 `{"app_id": "task-arena-v2.bob.two-role-submit-approve", "namespace": "ta2", "contract": "task-arena-v2.bob.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}`
   - ta 和 ta2 的 flow instances 完全独立
   - 角色绑定可以不同（ta2 的审批者可以是 alice，而 ta 的审批者是 bob）

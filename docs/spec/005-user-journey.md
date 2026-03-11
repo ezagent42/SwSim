@@ -29,7 +29,7 @@ Room 是协作空间，是所有 Socialware 运行的容器。
 
 ```
 simulation/workspace/rooms/{name}/
-├── contracts/       ← 已安装的 App 契约
+├── socialware-app/  ← 已安装的 App 契约
 ├── config.json      ← Room 配置（成员、namespace 注册）
 ├── state.json       ← 状态缓存（初始为空）
 ├── timeline/        ← Append-only 时间线
@@ -51,7 +51,7 @@ simulation/workspace/rooms/{name}/
       "{creator}:{Creator}@local": "owner"
     }
   },
-  "socialware": {
+  "socialware-app": {
     "installed": [],
     "roles": {}
   }
@@ -272,8 +272,8 @@ Namespace 前缀 (2-4个字符): ta
 
 ### 6.5 Step 4 — 生成文件
 
-- 生成 `workspace/rooms/{room}/contracts/{AppName}.{DeveloperName}.{SocialwareName}.app.md`（状态：已安装）
-- 更新 `workspace/rooms/{room}/config.json`（添加 namespace 到 `socialware.installed`，添加 role_map）
+- 生成 `workspace/rooms/{room}/socialware-app/{AppName}.{DeveloperName}.{SocialwareName}.app.md`（状态：已安装）
+- 更新 `workspace/rooms/{room}/config.json`（添加 namespace 到 `socialware-app.installed`，添加 role_map）
 
 ---
 
@@ -508,7 +508,7 @@ Identity: alice:Alice@local
 ```
 步骤:
 1. 关闭当前 session
-2. 编辑 contracts/task-arena.alice.two-role-submit-approve.app.md（修改 Flow 或绑定）
+2. 编辑 socialware-app/task-arena.alice.two-role-submit-approve.app.md（修改 Flow 或绑定）
 3. 重新启动 /socialware-app
 4. 重放 Timeline → 新逻辑生效
 ```
@@ -569,14 +569,14 @@ State = f(Timeline)
 python .claude/skills/socialware-app/scripts/rebuild-state.py \
     simulation/workspace/rooms/project-alpha
 
-# 指定契约目录（默认读取 room 内的 contracts/）
+# 指定契约目录（默认读取 room 内的 socialware-app/）
 python .claude/skills/socialware-app/scripts/rebuild-state.py \
     simulation/workspace/rooms/project-alpha \
-    simulation/workspace/rooms/project-alpha/contracts
+    simulation/workspace/rooms/project-alpha/socialware-app
 ```
 
 核心逻辑：
-1. 读取 Room 中所有 `contracts/*.app.md`，解析每个 namespace 的 §2 Flow 转换表和 §3 Commitments
+1. 读取 Room 中所有 `socialware-app/*.app.md`，解析每个 namespace 的 §2 Flow 转换表和 §3 Commitments
 2. 读取 `timeline/*.jsonl`，按 Lamport clock 排序
 3. 逐条重放：
    - subject 动作（`reply_to=null`）→ 创建新 flow instance

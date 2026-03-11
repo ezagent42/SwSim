@@ -15,7 +15,7 @@
 - **前置依赖**：无
 - **验证**：`simulation/workspace/rooms/doc-review/` 目录结构
 - **验收标准**：
-  - 目录存在：`identities/`, `contracts/`, `timeline/`, `content/`, `artifacts/`
+  - 目录存在：`identities/`, `socialware-app/`, `timeline/`, `content/`, `artifacts/`
   - `timeline/shard-001.jsonl` 存在且为空文件
   - `config.json` 存在且 JSON 有效
   - `state.json` 存在且 JSON 有效

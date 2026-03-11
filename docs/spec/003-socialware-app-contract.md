@@ -23,7 +23,7 @@
 | Tool | `_待实现_` | 绑定为 `bash: ...` 等 | 绑定为 `bash: ...` 等 |
 | 引用 | `_待实现_` 或 `_无_` | 具体路径或 `_无_` | 具体路径或 `_无_` |
 | Status | `模板` | `已开发` | `已安装` |
-| 存储 | `simulation/socialware/` | `simulation/app-store/` | `workspace/rooms/{room}/contracts/` |
+| 存储 | `simulation/socialware/` | `simulation/app-store/` | `workspace/rooms/{room}/socialware-app/` |
 
 **创建流程**：App Dev 复制模板 → 填充所有 §5 `_待实现_` → 保存为 `.app.md`（已开发）到 app-store，并在 `simulation/app-store/registry.json` 中创建注册条目。App Install 从 app-store（通过 registry.json 查询）复制 → 填充 §1 `_待绑定_` → 安装到 Room。模板保持只读。
 
@@ -67,7 +67,7 @@
 > 开发者: {username}:{nickname}@{namespace}
 ```
 
-**已安装阶段**（`rooms/{room}/contracts/{AppName}.{DeveloperName}.{SocialwareName}.app.md`）:
+**已安装阶段**（`rooms/{room}/socialware-app/{AppName}.{DeveloperName}.{SocialwareName}.app.md`）:
 
 ```markdown
 # {AppName}.{DeveloperName}.{SocialwareName}.app.md
@@ -173,7 +173,7 @@ App 文件新增的章节，定义运行时环境：
 
 ```
 Room "alpha"
-├── contracts/
+├── socialware-app/
 │   ├── task-arena.alice.two-role-submit-approve.app.md   (namespace: ta)
 │   ├── edit-workflow.alice.event-weaver.app.md           (namespace: ew)
 │   └── resource-pool.bob.resource-pool.app.md            (namespace: rp)
@@ -203,7 +203,7 @@ Room "alpha"
       "bob:Bob@local": "member"
     }
   },
-  "socialware": {
+  "socialware-app": {
     "installed": [
       {
         "app_id": "task-arena.alice.two-role-submit-approve",
@@ -247,8 +247,8 @@ Room "alpha"
 | `created_at` | ISO 8601 | 创建时间 |
 | `membership.policy` | string | `open` \| `knock` \| `invite`（映射 Arena §4） |
 | `membership.members` | object | entity → room role（`owner` \| `admin` \| `member`） |
-| `socialware.installed` | array | 已安装 App 的对象数组，每项含 `app_id`, `namespace`, `contract`, `template` |
-| `socialware.roles` | object | `{ns}:{R-ID}` → `{username}:{nickname}@{namespace}`，每个角色到身份的映射 |
+| `socialware-app.installed` | array | 已安装 App 的对象数组，每项含 `app_id`, `namespace`, `contract`, `template` |
+| `socialware-app.roles` | object | `{ns}:{R-ID}` → `{username}:{nickname}@{namespace}`，每个角色到身份的映射 |
 
 ---
 
@@ -382,7 +382,7 @@ Timeline 中的每条 entry 是一个 Ref，记录消息的元数据和指向 Co
 | `flow_states.*.subject_author` | string | 创建者（用于 CBAC `author` 检查） |
 | `flow_states.*.last_action` | string | 最后执行的动作 |
 | `flow_states.*.last_ref` | string | 最后一条相关 Ref 的 ID |
-| `role_map` | object | `{ns}:{R-ID}` → entity，从 config.json 的 `socialware.roles` 复制（不随 timeline 变化） |
+| `role_map` | object | `{ns}:{R-ID}` → entity，从 config.json 的 `socialware-app.roles` 复制（不随 timeline 变化） |
 | `commitments` | object | `{ns}:{id}` → 状态（`inactive` \| `active` \| `fulfilled` \| `violated`） |
 | `last_clock` | integer | 当前最大 Lamport clock |
 | `peer_cursors` | object | entity → 该 peer 上次见过的最大 clock（integer） |
@@ -516,7 +516,7 @@ workspace/rooms/{name}/artifacts/
       "bob:Bob@local": "member"
     }
   },
-  "socialware": {
+  "socialware-app": {
     "installed": [
       {
         "app_id": "task-arena.alice.two-role-submit-approve",

@@ -49,7 +49,7 @@
   - `state.json` 存在且 JSON 有效
   - `timeline/shard-001.jsonl` 存在且行数不变
   - `config.json` 存在且未修改
-  - `contracts/doc-audit.alice.two-role-submit-approve.app.md` 存在
+  - `socialware-app/doc-audit.alice.two-role-submit-approve.app.md` 存在
   - `content/` 下的 Content Object 文件都在
 
 ### Step 5: 重新启动 Session
@@ -87,7 +87,7 @@
 
 ### Step 8: 修改契约后热重启
 
-- **操作**：关闭 session → 编辑 `contracts/doc-audit.alice.two-role-submit-approve.app.md`（如修改某个 Tool 绑定）→ 重启
+- **操作**：关闭 session → 编辑 `socialware-app/doc-audit.alice.two-role-submit-approve.app.md`（如修改某个 Tool 绑定）→ 重启
 - **前置依赖**：Step 1
 - **验证**：新契约生效
 - **验收标准**：

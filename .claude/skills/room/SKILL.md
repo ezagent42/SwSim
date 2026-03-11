@@ -26,7 +26,7 @@ Room ≠ App。Room 是空间，App 是空间中可运行的指令集。一个 R
    ```
    simulation/workspace/rooms/{name}/
    ├── identities/    # Room 成员
-   ├── contracts/     # 已安装的 .app.md
+   ├── socialware-app/ # 已安装的 .app.md
    ├── config.json    # Room 配置
    ├── timeline/
    │   └── shard-001.jsonl
@@ -48,7 +48,7 @@ Room ≠ App。Room 是空间，App 是空间中可运行的指令集。一个 R
          "{username}:{nickname}@{namespace}": "owner"
        }
      },
-     "socialware": {
+     "socialware-app": {
        "installed": [],
        "roles": {}
      }

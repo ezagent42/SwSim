@@ -30,7 +30,7 @@
 - **验证**：Room 目录结构完整
 - **验收标准**：
   - `simulation/workspace/rooms/project-e2e/` 存在
-  - 子目录：identities/, contracts/, timeline/, content/, artifacts/
+  - 子目录：identities/, socialware-app/, timeline/, content/, artifacts/
   - `config.json` 中 alice:Alice@local 为 owner
   - `state.json` 中所有字段初始化为空
 
@@ -48,16 +48,16 @@
 
 - **操作**：
   1. 执行 `/socialware-app-dev`：模板=two-role-submit-approve，App-ID=`doc-audit.alice.two-role-submit-approve`，工具绑定=全部 manual → 产出 `app-store/doc-audit.alice.two-role-submit-approve.app.md`（状态：已开发），并注册到 `simulation/app-store/registry.json`
-  2. 执行 `/socialware-app-install`：从 registry.json 查询选择 App=`doc-audit.alice.two-role-submit-approve`，Room=project-e2e，namespace=da，角色绑定=R1→alice:Alice@local, R2→bob:Bob@local → 产出 `contracts/doc-audit.alice.two-role-submit-approve.app.md`（状态：已安装）
+  2. 执行 `/socialware-app-install`：从 registry.json 查询选择 App=`doc-audit.alice.two-role-submit-approve`，Room=project-e2e，namespace=da，角色绑定=R1→alice:Alice@local, R2→bob:Bob@local → 产出 `socialware-app/doc-audit.alice.two-role-submit-approve.app.md`（状态：已安装）
 - **前置依赖**：Step 1, Step 3
 - **验证**：App 开发并安装成功
 - **验收标准**：
   - `app-store/doc-audit.alice.two-role-submit-approve.app.md` 存在（已开发，§5 已填入，§1 Holder 为 `_待绑定_`）
   - `simulation/app-store/registry.json` 中已注册该 App
-  - `contracts/doc-audit.alice.two-role-submit-approve.app.md` 存在（已安装）
+  - `socialware-app/doc-audit.alice.two-role-submit-approve.app.md` 存在（已安装）
   - §1 Holder 已填入具体 Identity
   - §5 Tool 已填入（无 `_待实现_`）
-  - `config.json` 的 `socialware.installed` = `[{"app_id": "doc-audit.alice.two-role-submit-approve", "namespace": "da", "contract": "doc-audit.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}]`
+  - `config.json` 的 `socialware-app.installed` = `[{"app_id": "doc-audit.alice.two-role-submit-approve", "namespace": "da", "contract": "doc-audit.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}]`
   - `state.json` 的 `role_map` 有 alice 和 bob 的角色
   - `commitments` 有 `da:C1` 且 status=inactive
 
