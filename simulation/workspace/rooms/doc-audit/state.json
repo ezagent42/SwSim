@@ -1,9 +1,0 @@
-{
-  "flow_states": {},
-  "role_map": {},
-  "commitments": {},
-  "last_clock": 0,
-  "peer_cursors": {
-    "alice:Alice@local": 0
-  }
-}
