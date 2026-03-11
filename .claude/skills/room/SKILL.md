@@ -119,7 +119,7 @@ Room 创建/加入完成后，根据当前状态提示用户下一步：
 
 - **如果 `simulation/socialware/` 中无模板** → 提示：
   > Room 已就绪。下一步用 `/socialware-dev` 设计一个 Socialware 模板。
-- **如果有模板但 `simulation/workspace/app-store/` 中无 App** → 提示：
+- **如果有模板但 `simulation/app-store/` 中无 App** → 提示：
   > Room 已就绪。下一步用 `/socialware-app-dev` 基于模板开发 App。
 - **如果 app-store 中有已开发的 App** → 提示：
   > Room 已就绪。下一步用 `/socialware-app-install` 将已开发的 App 安装到此 Room 中。

@@ -8,7 +8,7 @@ SwSim is a Socialware contract-file model simulation. It simulates the full life
 
 - **Socialware** = contract file (`.socialware.md`) defining organization with 4 primitives (Role, Flow, Commitment, Arena)
 - **Socialware App** = developed contract (`.app.md`) with tool bindings filled
-- **App Store** = `workspace/app-store/` — developed Apps awaiting installation
+- **App Store** = `simulation/app-store/` — developed Apps awaiting installation
 - **Room** = collaboration space, can host multiple Socialware (Room ≠ App)
 - **Timeline** = append-only JSONL, single source of truth
 - **State** = pure-derived from Timeline, can be rebuilt anytime
@@ -21,7 +21,7 @@ SwSim is a Socialware contract-file model simulation. It simulates the full life
 - `docs/spec/` — Seven spec documents
 - `docs/testcase/` — Thirteen test cases
 - `simulation/socialware/` — Socialware templates (`.socialware.md`, read-only)
-- `simulation/workspace/app-store/` — Developed Apps (`.app.md`, tools bound, users unbound) + `registry.json`
+- `simulation/app-store/` — Developed Apps (`.app.md`, tools bound, users unbound) + `registry.json`
 - `simulation/workspace/identities/` — Global identity files
 - `simulation/workspace/rooms/` — Rooms with installed Apps
 - `.claude/skills/` — Five Skills (socialware-dev, socialware-app-dev, socialware-app-install, socialware-app, room)
@@ -63,7 +63,7 @@ socialware/           app-store/                rooms/{room}/contracts/     runt
 ## Development Rules
 
 1. Template files in `simulation/socialware/` are **READ-ONLY** after creation
-2. App Dev copies template to `workspace/app-store/{app-id}.app.md`, fills §5 tools, and registers in `app-store/registry.json`
+2. App Dev copies template to `simulation/app-store/{app-id}.app.md`, fills §5 tools, and registers in `simulation/app-store/registry.json`
 3. App Install copies from app-store to `workspace/rooms/{room}/contracts/` and fills §1 holders
 4. Timeline is **append-only** — never edit or delete entries
 5. State is always rebuildable from Timeline (`/rebuild`)

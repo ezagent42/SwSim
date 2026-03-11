@@ -237,7 +237,7 @@ Namespace 前缀 (2-4个字符): ta
 
 ### 5.6 Step 5 — 生成文件
 
-- 生成 `workspace/app-store/{AppName}.{DeveloperName}.{SocialwareName}.app.md`（状态：已开发，§1 Holder 仍为 `_待绑定_`）
+- 生成 `simulation/app-store/{AppName}.{DeveloperName}.{SocialwareName}.app.md`（状态：已开发，§1 Holder 仍为 `_待绑定_`）
 - 在 `simulation/app-store/registry.json` 中创建注册条目
 
 ---
@@ -254,7 +254,7 @@ Namespace 前缀 (2-4个字符): ta
 
 ### 6.2 Step 1 — 选择已开发 App
 
-从 `workspace/app-store/` 中选择一个已开发的 `.app.md`（通过 `simulation/app-store/registry.json` 查询可用 App）。
+从 `simulation/app-store/` 中选择一个已开发的 `.app.md`（通过 `simulation/app-store/registry.json` 查询可用 App）。
 
 ### 6.3 Step 2 — 选择目标 Room
 

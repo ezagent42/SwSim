@@ -25,4 +25,4 @@ socialware-dev skill §3 引导要求承诺必须具体可衡量：`{动作} + {
 - socialware-app-install → rooms/{room}/contracts/ (.app.md, §1=已填, namespace=已定)
 - socialware-app → runtime (timeline+state)
 
-新增 `workspace/app-store/` 目录和 `socialware-app-install` skill。
+新增 `simulation/app-store/` 目录和 `socialware-app-install` skill。

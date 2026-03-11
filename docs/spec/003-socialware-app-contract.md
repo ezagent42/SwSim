@@ -9,7 +9,7 @@
 ## 1. 概述
 
 `.app.md` 是 Socialware 的**绑定契约文件**。它有两种状态：
-- **已开发**（App Dev 产出）：所有 §5 `_待实现_` 字段已填入 Tool 和跨契约引用，但 §1 Holder 仍为 `_待绑定_`。存储在 `workspace/app-store/`。
+- **已开发**（App Dev 产出）：所有 §5 `_待实现_` 字段已填入 Tool 和跨契约引用，但 §1 Holder 仍为 `_待绑定_`。存储在 `simulation/app-store/`。
 - **已安装**（App Install 产出）：所有字段已填入真实值，§1 Holder 绑定为具体 Identity。安装在 Room 中，为 Room 提供一个 namespace 的命令集。
 
 ---
@@ -23,7 +23,7 @@
 | Tool | `_待实现_` | 绑定为 `bash: ...` 等 | 绑定为 `bash: ...` 等 |
 | 引用 | `_待实现_` 或 `_无_` | 具体路径或 `_无_` | 具体路径或 `_无_` |
 | Status | `模板` | `已开发` | `已安装` |
-| 存储 | `simulation/socialware/` | `workspace/app-store/` | `workspace/rooms/{room}/contracts/` |
+| 存储 | `simulation/socialware/` | `simulation/app-store/` | `workspace/rooms/{room}/contracts/` |
 
 **创建流程**：App Dev 复制模板 → 填充所有 §5 `_待实现_` → 保存为 `.app.md`（已开发）到 app-store，并在 `simulation/app-store/registry.json` 中创建注册条目。App Install 从 app-store（通过 registry.json 查询）复制 → 填充 §1 `_待绑定_` → 安装到 Room。模板保持只读。
 
@@ -56,7 +56,7 @@
 
 ### 4.1 Header
 
-**已开发阶段**（`app-store/{AppName}.{DeveloperName}.{SocialwareName}.app.md`）:
+**已开发阶段**（`simulation/app-store/{AppName}.{DeveloperName}.{SocialwareName}.app.md`）:
 
 ```markdown
 # {AppName}.{DeveloperName}.{SocialwareName}.app.md

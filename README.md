@@ -96,10 +96,10 @@ SwSim/
 │       └── 007-developer-integration.md
 ├── simulation/
 │   ├── socialware/        # Socialware templates (.socialware.md, read-only)
+│   ├── app-store/        # Developed apps (.app.md, awaiting install)
+│   │   └── registry.json  # App registry (app-dev registers, app-install queries)
 │   └── workspace/
 │       ├── identities/    # Global identities
-│       ├── app-store/     # Developed apps (.app.md, awaiting install)
-│       │   └── registry.json  # App registry (app-dev registers, app-install queries)
 │       └── rooms/
 │           └── {room_name}/
 │               ├── identities/   # Room members

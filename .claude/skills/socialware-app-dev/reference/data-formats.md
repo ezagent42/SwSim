@@ -28,7 +28,7 @@ simulation/workspace/
 
 ## App Store
 
-路径: `app-store/{app-id}.app.md`
+路径: `simulation/app-store/{app-id}.app.md`
 
 已开发但尚未安装的 Socialware App。§5 工具已填，§1 持有者为 `_待绑定_`。
 
@@ -38,7 +38,7 @@ simulation/workspace/
 
 ## App Registry
 
-路径: `simulation/app-store/registry.json`（注意: 不在 `workspace/` 下）
+路径: `simulation/app-store/registry.json`
 
 记录所有已开发 App 的注册信息。由 `/socialware-app-dev` 在创建 App 后通过 `register-app.py` 脚本写入。`/socialware-app-install` 读取此文件列出可安装的 App。
 
@@ -65,7 +65,7 @@ simulation/workspace/
   - `socialware`: 模板名（不含 `.socialware.md` 扩展名）
   - `developer`: 开发者身份（`{username}:{nickname}@{namespace}` 格式）
   - `created_at`: ISO8601 创建时间
-  - `app_file`: App 文件名（在 `workspace/app-store/` 中）
+  - `app_file`: App 文件名（在 `simulation/app-store/` 中）
   - `description`: 简要描述
 
 ## Room Config

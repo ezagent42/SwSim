@@ -138,7 +138,7 @@ Skill 引导你完成：
 1. 选择模板（从 `simulation/socialware/` 中选）
 2. 选择 namespace（如 `ew`）
 3. **逐个 Action 绑定工具**（这是核心步骤）
-4. 生成 `.app.md` 到 `workspace/app-store/`（状态：已开发），并在 `simulation/app-store/registry.json` 中创建注册条目
+4. 生成 `.app.md` 到 `simulation/app-store/`（状态：已开发），并在 `simulation/app-store/registry.json` 中创建注册条目
 
 ### 5.2b 安装 App 到 Room
 
@@ -147,7 +147,7 @@ Skill 引导你完成：
 ```
 
 Skill 引导你完成：
-1. 选择已开发 App（通过 `simulation/app-store/registry.json` 查询，从 `workspace/app-store/` 中选）
+1. 选择已开发 App（通过 `simulation/app-store/registry.json` 查询，从 `simulation/app-store/` 中选）
 2. 选择目标 Room
 3. 绑定 Role → Identity（你是谁，队友是谁）
 4. 安装到 Room（生成 `rooms/{room}/contracts/{AppName}.{DeveloperName}.{SocialwareName}.app.md`，状态：已安装）

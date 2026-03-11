@@ -59,7 +59,7 @@ Arena（边界）
 - **输入**：模板
 - **输出**：`.app.md` 已开发文件
 - **工作**：复制模板 → 绑定 Tool 到 Action → 填写跨契约引用（§5 `_待实现_` → 具体绑定），§1 Roles Holder 保持 `_待绑定_`
-- **存储**：`workspace/app-store/{app-id}.app.md`（App-ID 格式：`{AppName}.{DeveloperName}.{SocialwareName}`）
+- **存储**：`simulation/app-store/{app-id}.app.md`（App-ID 格式：`{AppName}.{DeveloperName}.{SocialwareName}`）
 - **注册**：在 `simulation/app-store/registry.json` 中创建条目
 - **性质**：已开发的 App，可安装到任意 Room
 - **状态**：`已开发`
@@ -88,7 +88,7 @@ Create space       Design org graph  Bind tools           Bind identities       
 │ config.json     │ .socialware.md  │ .app.md            │ .app.md (installed)  │ Timeline grows
 │ state.json      │ (template)      │ (developed)        │ (bound + room)       │ State derives
 ▼                 ▼                 ▼                    ▼                      ▼
-workspace/rooms/  socialware/       workspace/app-store/ rooms/{name}/contracts/ timeline/*.jsonl
+workspace/rooms/  socialware/       app-store/           rooms/{name}/contracts/ timeline/*.jsonl
 ```
 
 **契约状态流转**：`模板` → `已开发` → `已安装`
@@ -348,7 +348,7 @@ Identity: alice:Alice@local    Identity: bob:Bob@local
 |------|------|
 | Socialware | 契约文件（`.socialware.md`），用四原语定义组织 |
 | Socialware App | 开发并安装后的契约（`.app.md`）+ 运行时 workspace |
-| App Store | 已开发但未安装的 App 存储目录（`workspace/app-store/`），注册信息在 `simulation/app-store/registry.json` |
+| App Store | 已开发但未安装的 App 存储目录（`simulation/app-store/`），注册信息在 `simulation/app-store/registry.json` |
 | Room | 协作空间，可承载多个 Socialware |
 | Namespace | Socialware 在 Room 中的命名前缀（如 `ew`, `ta`） |
 | Timeline | Append-only JSONL，唯一真相源 |

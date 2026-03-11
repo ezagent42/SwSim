@@ -50,11 +50,11 @@
 
 ### Step 4: 验证 app-store 中的已开发 App
 
-- **操作**：读取 `simulation/workspace/app-store/doc-audit.alice.two-role-submit-approve.app.md`
+- **操作**：读取 `simulation/app-store/doc-audit.alice.two-role-submit-approve.app.md`
 - **前置依赖**：Step 3
 - **验证**：文件格式和内容完整，且已注册到 registry
 - **验收标准**：
-  - 文件存放在 `simulation/workspace/app-store/` 目录
+  - 文件存放在 `simulation/app-store/` 目录
   - 文件名为 `{AppName}.{DeveloperName}.{SocialwareName}.app.md`（即 `doc-audit.alice.two-role-submit-approve.app.md`），不是模板名
   - Header 中状态为「已开发」
   - Header 包含来源模板名、App-ID

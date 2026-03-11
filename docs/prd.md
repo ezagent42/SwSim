@@ -113,7 +113,7 @@ Room/Users          Socialware Dev    App Dev          App Install
 
 - **输入**：Template + 工具绑定决策
 - **工具**：`/socialware-app-dev`
-- **输出**：`workspace/app-store/{AppName}.{DeveloperName}.{SocialwareName}.app.md`（状态：`已开发`，§5 已填工具，§1 仍为 `_待绑定_`）
+- **输出**：`simulation/app-store/{AppName}.{DeveloperName}.{SocialwareName}.app.md`（状态：`已开发`，§5 已填工具，§1 仍为 `_待绑定_`）
 - **注册**：在 `simulation/app-store/registry.json` 中创建条目
 
 ### 4.4 Socialware App Install → Installed App
