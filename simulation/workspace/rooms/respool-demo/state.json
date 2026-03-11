@@ -1,0 +1,22 @@
+{
+  "flow_states": {},
+  "role_map": {
+    "rp:R1": "admin@local",
+    "rp:R2": "user@local",
+    "rp:R3": "admin:creator@local",
+    "rp:R4": "user:monitor@local",
+    "rp:R5": "admin:cleaner@local"
+  },
+  "commitments": {
+    "rp:C1": { "status": "inactive" },
+    "rp:C2": { "status": "inactive" }
+  },
+  "last_clock": 0,
+  "peer_cursors": {
+    "admin@local": 0,
+    "user@local": 0,
+    "admin:creator@local": 0,
+    "user:monitor@local": 0,
+    "admin:cleaner@local": 0
+  }
+}

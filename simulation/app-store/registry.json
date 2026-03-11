@@ -1,4 +1,13 @@
 {
-  "version": 1,
-  "apps": {}
+  "apps": {
+    "respool.admin.rp-respool": {
+      "app_file": "respool.admin.rp-respool.app.md",
+      "app_id": "respool.admin.rp-respool",
+      "created_at": "2026-03-11T07:41:00Z",
+      "description": "资源池管理 App：资源申请/创建/分配/释放/结算全生命周期，绑定 OneSystem CLI",
+      "developer": "admin:Admin@local",
+      "socialware": "rp-respool"
+    }
+  },
+  "version": 1
 }

@@ -12,7 +12,10 @@ SwSim is a Socialware contract-file model simulation. It simulates the full life
 - **Room** = collaboration space, can host multiple Socialware (Room ≠ App)
 - **Timeline** = append-only JSONL, single source of truth
 - **State** = pure-derived from Timeline, can be rebuilt anytime
-- **Identity** = `{username}:{nickname}@{namespace}` format (e.g., `alice:Alice@local`), no `@` prefix
+- **Identity** = `{username}@{namespace}` (human) or `{username}:{session-name}@{namespace}` (agent session), no `@` prefix
+  - Human user: `alice@local` — 无 session name
+  - Agent session: `alice:ppt-maker@local` — `session-name` 是 Claude Code（或其它 Agent）的 session 名称，由创建者指定
+  - 文件名始终为 `{username}@{namespace}.json`（省略 session-name）
 - **Identity 前置条件** = 所有 Skill 启动时必须确认身份（`workspace/identities/` 中存在），`/room` 是身份的创建入口
 
 ## Directory Structure
@@ -82,7 +85,7 @@ socialware/           app-store/                rooms/{room}/socialware-app/ run
 ## P2P Simulation
 
 - **Multi-session mode**: Each Claude Code session = one peer identity, sharing workspace files
-- **Single-session mode**: Use `/switch {entity}:{nickname}@local` for identity switching (fallback)
+- **Single-session mode**: Use `/switch {username}@local` or `/switch {username}:{session-name}@local` for identity switching (fallback)
 - **Inbox hook**: `UserPromptSubmit` hook scans `rooms/{room}/.session.{username}.json`（per-room per-identity，支持多 peer 同时运行）
 - **Session 生命周期**: `/socialware-app` 启动创建，`/quit` 退出删除，`/room clean-sessions` 清理残留
 - **tmux watcher**: Each peer gets a watcher pane for passive notification
