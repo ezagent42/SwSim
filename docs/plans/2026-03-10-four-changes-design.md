@@ -7,9 +7,9 @@
 
 socialware-dev skill §3 引导要求承诺必须具体可衡量：`{动作} + {量化指标} + {条件}`。
 
-## 变更 2: 身份格式 `alice@local`
+## 变更 2: 身份格式 `alice:Alice@local`
 
-全局替换 `@entity:local` → `entity@local`。无 `@` 前缀，`@` 仅作 username/domain 分隔符。
+全局替换为 `{username}:{nickname}@{namespace}` 格式（如 `alice:Alice@local`）。`@` 作 identity/domain 分隔符，`:` 作 username/nickname 分隔符。
 
 ## 变更 3: 强制检查 peer_cursor
 

@@ -32,8 +32,8 @@
   - `created_at` 为有效 ISO 8601
   - `membership.policy` 为 `invite`
   - `membership.members` 包含 `"alice:Alice@local": "owner"`
-  - `socialware.installed` 为空数组 `[]`
-  - `socialware.roles` 为空对象 `{}`
+  - `socialware-app.installed` 为空数组 `[]`
+  - `socialware-app.roles` 为空对象 `{}`
 
 ### Step 3: 验证 state.json 初始结构
 

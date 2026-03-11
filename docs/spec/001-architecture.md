@@ -38,21 +38,21 @@ Arena（边界）
 
 ## 3. 五步开发模型
 
-### 3.1 Socialware Dev — 设计契约模板
-
-- **输入**：组织需求描述（自然语言）
-- **输出**：`.socialware.md` 模板文件
-- **工作**：定义四原语（Role / Flow / Commitment / Arena），§5 Bindings 为 `_待实现_`，§1 Roles Holder 为 `_待绑定_`
-- **存储**：`simulation/socialware/`
-- **性质**：模板是只读产品，可分发、可复用
-
-### 3.2 Room — 创建协作空间
+### 3.1 Room — 创建协作空间
 
 - **输入**：Room 名称 + 创建者 Identity
 - **输出**：Room 目录结构 + config.json + state.json
 - **工作**：创建空间、添加成员，为后续安装 Socialware 做准备
 - **存储**：`workspace/rooms/{name}/`
 - **性质**：Room 是独立于 App 的基础设施
+
+### 3.2 Socialware Dev — 设计契约模板
+
+- **输入**：组织需求描述（自然语言）
+- **输出**：`.socialware.md` 模板文件
+- **工作**：定义四原语（Role / Flow / Commitment / Arena），§5 Bindings 为 `_待实现_`，§1 Roles Holder 为 `_待绑定_`
+- **存储**：`simulation/socialware/`
+- **性质**：模板是只读产品，可分发、可复用
 
 ### 3.3 Socialware App Dev — 开发契约
 
@@ -88,7 +88,8 @@ Create space       Design org graph  Bind tools           Bind identities       
 │ config.json     │ .socialware.md  │ .app.md            │ .app.md (installed)  │ Timeline grows
 │ state.json      │ (template)      │ (developed)        │ (bound + room)       │ State derives
 ▼                 ▼                 ▼                    ▼                      ▼
-workspace/rooms/  socialware/       app-store/           rooms/{name}/socialware-app/ timeline/*.jsonl
+workspace/rooms/  socialware/       app-store/           rooms/{name}/          timeline/*.jsonl
+                                                         socialware-app/
 ```
 
 **契约状态流转**：`模板` → `已开发` → `已安装`
