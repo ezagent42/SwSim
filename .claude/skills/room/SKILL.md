@@ -107,6 +107,24 @@ Room ≠ App。Room 是空间，App 是空间中可运行的指令集。一个 R
 4. 在 `simulation/workspace/rooms/{name}/identities/` 创建成员引用 `{username}@{namespace}.json`（与全局 identity 相同内容）
 5. 在 state.json 的 `peer_cursors` 中初始化：`"{username}:{nickname}@{namespace}": 0`
 
+### `/room clean-sessions`
+
+清理残留的 session 文件（用户未执行 `/quit` 直接关闭终端时产生）:
+
+1. 扫描 `simulation/workspace/rooms/*/.session.*.json`
+2. 列出所有找到的 session 文件，显示 room、identity、started_at
+3. 询问用户确认删除（全部删除 or 选择性删除）
+4. 删除选中的 session 文件
+5. 展示结果
+
+```
+发现 2 个残留 session:
+  1. rooms/doc-review/.session.alice.json  (alice:Alice@local, 启动于 2026-03-11T10:00:00Z)
+  2. rooms/project-alpha/.session.bob.json (bob:Bob@local, 启动于 2026-03-11T11:00:00Z)
+
+删除全部？(y/n/选择编号)
+```
+
 ## 参考
 
 - 初始化脚本: @init-workspace.sh

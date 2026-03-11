@@ -261,7 +261,11 @@ Runtime 会话标记，由 `/socialware-app` 启动时创建，`/quit` 退出时
 }
 ```
 
-其他 skill（`/socialware-dev`、`/socialware-app-dev`、`/socialware-app-install`、`/room`）启动时如果发现此文件存在，应删除它。
+生命周期:
+- **创建**: `/socialware-app` 启动时
+- **删除**: `/quit` 退出时
+- **清理残留**: `/room clean-sessions`（用户未执行 `/quit` 直接关闭终端时使用）
+- **其他 skill 不干预**: `/socialware-dev`、`/socialware-app-dev`、`/socialware-app-install`、`/room` 不删除此文件，避免干扰正在运行的 session
 
 ## Artifacts
 

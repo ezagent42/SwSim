@@ -74,7 +74,7 @@ socialware/           app-store/                rooms/{room}/socialware-app/ run
 | Skill | 用途 | 产出 |
 |-------|------|------|
 | `/socialware-dev` | 设计组织 → 模板 | `.socialware.md` |
-| `/room` | 创建/列表/管理 Room | Room 目录 + config.json |
+| `/room` | 创建/列表/管理 Room + 清理 session | Room 目录 + config.json |
 | `/socialware-app-dev` | 开发 App（填工具） | `app-store/{app-id}.app.md` |
 | `/socialware-app-install` | 安装 App 到 Room（绑用户） | `rooms/{room}/socialware-app/` |
 | `/socialware-app` | 运行 App（文字游戏运行时） | Timeline entries |
@@ -84,6 +84,7 @@ socialware/           app-store/                rooms/{room}/socialware-app/ run
 - **Multi-session mode**: Each Claude Code session = one peer identity, sharing workspace files
 - **Single-session mode**: Use `/switch {entity}:{nickname}@local` for identity switching (fallback)
 - **Inbox hook**: `UserPromptSubmit` hook scans `rooms/{room}/.session.{username}.json`（per-room per-identity，支持多 peer 同时运行）
+- **Session 生命周期**: `/socialware-app` 启动创建，`/quit` 退出删除，`/room clean-sessions` 清理残留
 - **tmux watcher**: Each peer gets a watcher pane for passive notification
 - Shared filesystem = P2P network (Zenoh simulation)
 
