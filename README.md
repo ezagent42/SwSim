@@ -25,27 +25,34 @@ Template (.socialware.md) + Identity bindings + Tool bindings = Runnable App (.a
 
 模板是组织的抽象设计，App 是模板的具体实例——绑定了真实身份和工具后，可以在 Room 中运行。
 
-## 四步开发模型
+## 五步开发模型
 
-### 1. `/socialware-dev` — 设计组织图
+### 1. `/room` — 创建协作空间（+ 身份）
+
+- 输入：Room 名称 + 创建者身份
+- 输出：Room 目录结构 + config.json + identity 文件
+- 工作内容：创建 Room，创建身份（身份入口），添加成员
+
+### 2. `/socialware-dev` — 设计组织图
 
 - 输入：组织需求描述
 - 输出：模板文件（`.socialware.md`）
 - 工作内容：定义 Role、Flow、Commitment、Arena
 
-### 2. `/room` — 创建协作空间
+### 3. `/socialware-app-dev` — 开发 App（填工具）
 
-- 输入：Room 名称 + 创建者
-- 输出：Room 目录结构 + config.json
-- 工作内容：创建/列表/管理 Room，添加成员
+- 输入：模板
+- 输出：`app-store/{app-id}.app.md`（已开发，§5 已填工具，§1 仍为 `_待绑定_`）
+- App-ID 格式：`{AppName}.{DeveloperName}.{SocialwareName}`（如 `doc-review.alice.two-role-submit-approve`）
+- 工作内容：复制模板到 app-store，为每个 Action 绑定工具，注册到 `app-store/registry.json`
 
-### 3. `/socialware-app-dev` — 绑定工具 + 安装到 Room
+### 4. `/socialware-app-install` — 安装 App 到 Room（绑用户）
 
-- 输入：模板 + 目标 Room
-- 输出：绑定后的 App 文件（`.app.md`）
-- 工作内容：复制模板到 Room，绑定 Identity 和 Tool，配置 namespace
+- 输入：app-store 中的已开发 App + 目标 Room
+- 输出：`rooms/{room}/socialware-app/{app-id}.app.md`（已安装，§1 已填持有者）
+- 工作内容：选择 namespace，绑定 Identity 到 Role，安装到 Room
 
-### 4. `/socialware-app` — 文字游戏运行时
+### 5. `/socialware-app` — 文字游戏运行时
 
 - 输入：已安装的 App
 - 输出：Timeline 中的持久化交互记录
@@ -69,11 +76,13 @@ Room "alpha"
 ```
 SwSim/
 ├── .claude/               # Claude Code configuration
-│   └── skills/            # Skill definitions
-│       ├── socialware-dev/
-│       ├── socialware-app-dev/
-│       ├── socialware-app/
-│       └── room/
+│   ├── skills/            # Skill definitions
+│   │   ├── socialware-dev/
+│   │   ├── socialware-app-dev/
+│   │   ├── socialware-app-install/
+│   │   ├── socialware-app/
+│   │   └── room/
+│   └── scripts/           # Hook scripts
 ├── docs/
 │   ├── exp-plan.md        # End-to-end experiment plan
 │   ├── prd.md             # Product form definition
@@ -86,13 +95,15 @@ SwSim/
 │       ├── 006-p2p-simulation.md
 │       └── 007-developer-integration.md
 ├── simulation/
-│   ├── contracts/         # Socialware templates (.socialware.md, read-only)
+│   ├── socialware/        # Socialware templates (.socialware.md, read-only)
+│   ├── app-store/        # Developed apps (.app.md, awaiting install)
+│   │   └── registry.json  # App registry (app-dev registers, app-install queries)
 │   └── workspace/
 │       ├── identities/    # Global identities
 │       └── rooms/
 │           └── {room_name}/
 │               ├── identities/   # Room members
-│               ├── contracts/    # Installed apps (.app.md)
+│               ├── socialware-app/ # Installed apps (.app.md)
 │               ├── config.json
 │               ├── timeline/
 │               ├── content/
@@ -109,7 +120,7 @@ SwSim/
 /socialware-dev
 ```
 
-描述你的组织需求，Skill 会引导你定义 Role、Flow、Commitment、Arena，输出 `.socialware.md` 模板文件到 `simulation/contracts/`。
+描述你的组织需求，Skill 会引导你定义 Role、Flow、Commitment、Arena，输出 `.socialware.md` 模板文件到 `simulation/socialware/`。
 
 ### 第二步：创建 Room
 
@@ -119,15 +130,23 @@ SwSim/
 
 创建协作空间，添加成员（Identity）。Room 是 Socialware 的运行容器——先有空间，再安装 App。
 
-### 第三步：绑定并安装
+### 第三步：开发 App
 
 ```
 /socialware-app-dev
 ```
 
-选择模板和目标 Room，绑定真实 Identity 和 Tool，生成 `.app.md` 并安装到 Room 的 `contracts/` 目录。
+选择模板，为每个 Action 绑定工具，生成 `.app.md` 到 `app-store/`。
 
-### 第四步：运行
+### 第四步：安装到 Room
+
+```
+/socialware-app-install
+```
+
+从 app-store 选择已开发 App，选择目标 Room，绑定 Identity 到 Role，安装到 Room 的 `socialware-app/` 目录。
+
+### 第五步：运行
 
 ```
 /socialware-app
@@ -144,19 +163,22 @@ SwSim/
 **一键启动**：
 
 ```bash
-# tmux 自动创建多 pane，每个 pane 一个 peer
-.claude/skills/socialware-app/scripts/start-p2p.sh project-alpha @alice @bob
+# tmux 自动创建多 pane（n identity → 2n pane: peer + watcher）
+.claude/skills/socialware-app/scripts/start-p2p.sh project-alpha alice:Alice@local bob:Bob@local
+
+# 如果 session 已存在，使用 --force 销毁并重建
+.claude/skills/socialware-app/scripts/start-p2p.sh --force project-alpha alice:Alice@local bob:Bob@local
 ```
 
 ```
 ┌─────────────────────┬─────────────────────┐
-│ Peer: @alice        │ Peer: @bob          │
+│ Peer: alice:Alice@local │ Peer: bob:Bob@local │
 │ Room: project-alpha │ Room: project-alpha │
 │ /socialware-app     │ /socialware-app     │
 │                     │                     │
 │ > 提交任务...       │ > /inbox            │
 │ [clock:3] 已提交    │ 📬 1 条新消息:      │
-│                     │ [3] @alice → submit │
+│                     │ [3] alice → submit  │
 └─────────────────────┴─────────────────────┘
 ```
 
@@ -180,7 +202,7 @@ SwSim/
 
 ### Single-session 模式（fallback）
 
-单个 session 中使用 `/switch @entity` 切换身份，模拟多方交互。切换时自动显示收件箱。
+单个 session 中使用 `/switch entity:Nickname@local` 切换身份，模拟多方交互。切换时自动显示收件箱。
 
 ## 核心洞察
 

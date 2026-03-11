@@ -1,16 +1,31 @@
 ---
 name: socialware-app
-description: "Run a bound Socialware contract — text-game runtime with persistent Timeline, Flow state machines, role checks, Commitment tracking, and P2P simulation."
+description: "Run an installed Socialware contract — text-game runtime with persistent Timeline, Flow state machines, role checks, Commitment tracking, and P2P simulation."
 ---
 
 # Socialware App — 契约运行时模拟
+
+## 启动前置
+
+1. **身份确认**: 扫描 `simulation/workspace/identities/*.json`，列出可用身份。
+   - 如果无身份或无 Room → 提示：先用 `/room create` 创建身份和 Room，然后用 `/socialware-dev` 设计模板（`.socialware.md`），再 `/socialware-app-dev` 开发 App，最后 `/socialware-app-install` 安装。
+   - 如果有身份 → 让用户选择以哪个身份操作。
+   - **该身份必须是目标 Room 的成员**（启动时验证 config.json membership）。
+2. 创建 session 文件 `simulation/workspace/rooms/{room}/.session.{username}.json`（per-room per-identity，支持多 peer 同时运行）:
+```json
+{
+  "room": "{room}",
+  "identity": "{username}:{nickname}@{namespace}",
+  "started_at": "{ISO8601}"
+}
+```
 
 ## 你在运行什么
 
 **你在运行一个 Socialware App——一个由契约定义的组织**。
 
 运行时体验：
-- 以某个身份（@alice:local）参与组织
+- 以某个身份（alice:Alice@local）参与组织
 - 通过自然语言触发动作
 - Runtime 检查角色权限和 Flow 状态，执行绑定的工具
 - 每个动作产生一条消息，追加到 Timeline（append-only JSONL）
@@ -31,12 +46,16 @@ description: "Run a bound Socialware contract — text-game runtime with persist
 ### 方式一：tmux 多 pane（推荐）
 
 ```bash
-# 一键启动 2 个 peer
-./scripts/start-p2p.sh project-alpha @alice @bob
+# 一键启动 2 个 peer（n 个 identity → 2n 个 pane: peer + watcher）
+./scripts/start-p2p.sh project-alpha alice:Alice@local bob:Bob@local
+
+# 如果 session 已存在，使用 --force 销毁并重建
+./scripts/start-p2p.sh --force project-alpha alice:Alice@local bob:Bob@local
 ```
 
-每个 tmux pane 自动启动独立的 Claude Code 会话，以不同身份进入同一个 Room。
+每个 identity 占 2 个 pane：上方 Claude Code 会话（peer），下方 watch-timeline.sh（watcher, 20% 高度）。
 pane 之间通过共享文件系统通信：Alice 写入 timeline → Bob 的 watcher 检测到新消息。
+不加 `--force` 再次运行会 attach 到已有 session。
 
 ### 方式二：手动多终端
 
@@ -44,23 +63,24 @@ pane 之间通过共享文件系统通信：Alice 写入 timeline → Bob 的 wa
 
 ### 方式三：单会话 /switch（Fallback）
 
-如果不方便开多终端，在同一个会话中用 `/switch @entity` 切换身份。
+如果不方便开多终端，在同一个会话中用 `/switch {username}:{nickname}@{namespace}` 切换身份。
 
 ## 启动
 
 1. 询问用户: 进入哪个 Room？以哪个身份？（多会话模式下可从环境变量 `SWSIM_ROOM` 和 `SWSIM_IDENTITY` 读取）
 2. 读取 `simulation/workspace/rooms/{room}/config.json`
 3. 确认身份在 Room 成员列表中
-4. 读取所有已安装的 `contracts/*.app.md`
+4. 读取所有已安装的 `socialware-app/*.app.md`
 5. 加载 state.json（不存在则从 timeline 重建）
-6. 打印启动面板:
+6. **创建 `.session.{username}.json`**（启用 UserPromptSubmit hook 的 inbox 检查）
+7. 打印启动面板:
 
 ```
 ══════════════════════════════════════════════════
   {Room Name} — Socialware Runtime
 ══════════════════════════════════════════════════
   Room: {room_id}
-  身份: @{entity}:local
+  身份: {username}:{nickname}@{namespace}
   角色: {ns1:role1}, {ns2:role2}, ...
   可用动作: {ns1:action1}, {ns2:action2}, ...
   已安装: {ns1} ({name1}), {ns2} ({name2}), ...
@@ -74,7 +94,7 @@ pane 之间通过共享文件系统通信：Alice 写入 timeline → Bob 的 wa
 用户输入 → 解析为 {namespace}:{action}
   │
   [pre_send]
-  ├─ 角色检查: config.json → socialware.roles
+  ├─ 角色检查: config.json → socialware-app.roles
   ├─ 能力约束(CBAC): any → 通过; author → 沿 reply_to 链回溯, 比对 author
   ├─ Flow 检查: state.json → flow_states
   ├─ 跨 namespace: 同 state.json 内不同 namespace 的 flow_states
@@ -102,11 +122,11 @@ pane 之间通过共享文件系统通信：Alice 写入 timeline → Bob 的 wa
 | `/roles` | 角色分配表 |
 | `/commitments` | Commitment 状态 |
 | `/inbox` | 未读消息（clock > peer_cursor 的条目） |
-| `/switch @{entity}` | 单会话模式: P2P 身份切换 |
+| `/switch {username}:{nickname}@{namespace}` | 单会话模式: P2P 身份切换 |
 | `/history` | 消息历史 |
 | `/timeline` | 原始 timeline JSONL |
 | `/rebuild` | 从 timeline 重建 state.json |
-| `/quit` | 退出（持久化 peer_cursor） |
+| `/quit` | 退出（持久化 peer_cursor，删除 .session.{username}.json） |
 
 ## /switch — 单会话 P2P 模拟（Fallback）
 
@@ -114,8 +134,15 @@ pane 之间通过共享文件系统通信：Alice 写入 timeline → Bob 的 wa
 2. Filter timeline: clock > cursor → inbox
 3. 打印收件箱
 4. 更新 cursor，切换 author
+5. 更新 `.session.{username}.json` 中的 identity
 
 > 多会话模式下不需要 /switch。每个 Claude Code 会话以不同身份启动即可。
+
+## /quit — 退出
+
+1. 持久化当前 peer_cursor 到 state.json
+2. **删除 `simulation/workspace/rooms/{room}/.session.{username}.json`**（停用 inbox hook）
+3. 打印退出信息
 
 ## /rebuild — CRDT 验证
 
@@ -139,6 +166,14 @@ pane 之间通过共享文件系统通信：Alice 写入 timeline → Bob 的 wa
 Claude Code 会话是用户驱动的（同步），实际并发概率极低。
 如果 state.json 意外损坏 → `/rebuild` 从 timeline 重建。
 
+## 完成提示
+
+运行结束后（用户执行 `/quit`），提示：
+
+> Session 已结束。如需重新进入，执行 `/socialware-app` 选择 Room 和身份即可。
+
+**完整流程参考**: `/room` → `/socialware-dev` → `/socialware-app-dev` → `/socialware-app-install` → `/socialware-app`
+
 ## 关键原则
 
 - **Timeline 是 truth**: state.json 可删除重建
@@ -147,3 +182,5 @@ Claude Code 会话是用户驱动的（同步），实际并发概率极低。
 - **模拟不是假装**: bash 真执行，只有 P2P 是模拟的
 - **多会话优先**: 每个 peer 一个 Claude Code 会话，共享文件系统
 - **消息通知**: watch-timeline.sh 实时监听，/inbox 主动查询
+- **session 生命周期**: 启动创建 `rooms/{room}/.session.{username}.json`，退出删除。per-room per-identity，支持多 peer 同时运行
+- **身份格式**: `{username}:{nickname}@{namespace}`（如 `alice:Alice@local`），无 `@` 前缀

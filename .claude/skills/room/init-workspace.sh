@@ -6,7 +6,7 @@
 #
 # 创建:
 #   simulation/workspace/rooms/<name>/identities/
-#   simulation/workspace/rooms/<name>/contracts/
+#   simulation/workspace/rooms/<name>/socialware-app/
 #   simulation/workspace/rooms/<name>/config.json
 #   simulation/workspace/rooms/<name>/timeline/shard-001.jsonl
 #   simulation/workspace/rooms/<name>/content/
@@ -29,7 +29,7 @@ fi
 # 创建目录结构
 mkdir -p "${WORKSPACE}/identities"
 mkdir -p "${ROOM_DIR}/identities"
-mkdir -p "${ROOM_DIR}/contracts"
+mkdir -p "${ROOM_DIR}/socialware-app"
 mkdir -p "${ROOM_DIR}/timeline"
 mkdir -p "${ROOM_DIR}/content"
 mkdir -p "${ROOM_DIR}/artifacts"
@@ -57,5 +57,5 @@ echo "Room 工作空间初始化完成: ${ROOM_DIR}"
 echo ""
 echo "下一步:"
 echo "  1. 创建 config.json:  ${ROOM_DIR}/config.json"
-echo "  2. 创建 identity 文件: ${WORKSPACE}/identities/@<entity>.json"
-echo "  3. 使用 /socialware-app-dev 安装 Socialware"
+echo "  2. 创建 identity 文件: ${WORKSPACE}/identities/<username>@<namespace>.json"
+echo "  3. 使用 /socialware-dev 设计 Socialware 模板"

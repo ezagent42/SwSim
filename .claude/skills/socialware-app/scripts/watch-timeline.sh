@@ -2,11 +2,11 @@
 # watch-timeline.sh — 监听 Timeline 变化，打印新消息通知
 #
 # 用法:
-#   ./watch-timeline.sh <room_name> [@identity]
+#   ./watch-timeline.sh <room_name> [identity]
 #
 # 示例:
-#   ./watch-timeline.sh project-alpha           # 显示所有消息
-#   ./watch-timeline.sh project-alpha @bob      # 过滤掉 @bob 自己的消息
+#   ./watch-timeline.sh project-alpha              # 显示所有消息
+#   ./watch-timeline.sh project-alpha bob:Bob@local    # 过滤掉 bob:Bob@local 自己的消息
 #
 # 效果:
 #   持续监听 timeline 目录，打印新消息通知。
@@ -19,7 +19,7 @@
 
 set -euo pipefail
 
-ROOM_NAME="${1:?用法: $0 <room_name> [@identity]}"
+ROOM_NAME="${1:?用法: $0 <room_name> [identity]}"
 IDENTITY="${2:-}"
 
 TIMELINE_DIR="simulation/workspace/rooms/${ROOM_NAME}/timeline"

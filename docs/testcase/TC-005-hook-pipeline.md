@@ -11,45 +11,45 @@
 
 ### Step 1: Role Check — 通过
 
-- **操作**：@alice（持有 R1/提交者）执行 `da:submit`
+- **操作**：alice（持有 R1/提交者）执行 `da:submit`
 - **前置依赖**：TC-004 Step 1（App 已启动）
 - **验证**：Role Check 通过
 - **验收标准**：
-  - @alice 在 `role_map` 中有 `da:R1`（或对应角色名如 `da:poster`）
+  - alice 在 `role_map` 中有 `da:R1`（`role_map["da:R1"]` = `"alice:Alice@local"`）
   - `da:submit` 要求 R1（提交者）
   - 匹配成功，检查通过
 
 ### Step 2: Role Check — 拒绝
 
-- **操作**：@bob（仅持有 R2/审批者）尝试执行 `da:submit`
+- **操作**：bob（仅持有 R2/审批者）尝试执行 `da:submit`
 - **前置依赖**：Step 1
 - **验证**：Role Check 拒绝
 - **验收标准**：
-  - @bob 在 `role_map` 中仅有 `da:R2`（或 `da:approver`）
+  - bob 在 `role_map` 中仅有 `da:R2`（`role_map["da:R2"]` = `"bob:Bob@local"`）
   - `da:submit` 要求 R1
-  - @bob 不持有 R1，操作被拒绝
+  - bob 不持有 R1，操作被拒绝
   - Timeline 中**不**新增任何 entry
   - 显示明确的错误信息，包含角色不匹配原因
 
 ### Step 3: CBAC Check — `any` 类型
 
-- **操作**：@alice 执行 `da:submit`（CBAC=any）
+- **操作**：alice 执行 `da:submit`（CBAC=any）
 - **前置依赖**：Step 1
 - **验证**：任何持有 required_role 的人都可执行
 - **验收标准**：
   - Flow 表中 submit 的 CBAC 为 `any`
-  - @alice 持有 R1 → CBAC 检查通过
+  - alice 持有 R1 → CBAC 检查通过
   - 如果另一个 R1 持有者存在，同样可以 submit
 
 ### Step 4: CBAC Check — `author` 类型
 
-- **操作**：@alice 提交任务（msg-A），@bob 驳回（msg-B），@alice 执行 revise（CBAC=author）
+- **操作**：alice 提交任务（msg-A），bob 驳回（msg-B），alice 执行 revise（CBAC=author）
 - **前置依赖**：Step 3
 - **验证**：只有 flow instance 的 subject_author 才能 revise
 - **验收标准**：
   - revise 的 CBAC 为 `author`
-  - @alice 是 msg-A 的 subject_author → 可以 revise
-  - 如果 @bob 尝试 revise msg-A → CBAC 拒绝（@bob 不是 author）
+  - alice 是 msg-A 的 subject_author → 可以 revise
+  - 如果 bob 尝试 revise msg-A → CBAC 拒绝（bob 不是 author）
   - 错误信息明确说明"仅原始提交者可执行此操作"
 
 ### Step 5: Flow Check — 合法转换
@@ -123,8 +123,8 @@
 - **前置依赖**：Step 9
 - **验证**：其他 peer 可发现新消息
 - **验收标准**：
-  - 切换到 @bob（`/switch @bob`）后显示收件箱
-  - 收件箱包含刚才 @alice 的操作
+  - 切换到 bob（`/switch bob:Bob@local`）后显示收件箱
+  - 收件箱包含刚才 alice 的操作
   - 收件箱消息包含 clock 值和操作摘要
 
 ### Step 12: Pipeline 中断 — pre_send 失败不写入

@@ -29,7 +29,10 @@
 创建/加入 Room (/room)
     │
     ▼
-绑定安装 (/socialware-app-dev)：为每个 Action 选择工具 → 生成 .app.md
+开发 App (/socialware-app-dev)：为每个 Action 选择工具 → 生成 .app.md 到 app-store + 注册到 registry.json
+    │
+    ▼
+安装 App (/socialware-app-install)：绑定 Identity 到 Role → 安装到 Room
     │
     ▼
 运行 (/socialware-app)：Hook Pipeline 的 execute 阶段调用你绑定的工具
@@ -66,18 +69,15 @@
 
 ### 3.3 §5 Context Bindings — 需要绑定什么？
 
-模板中 §5 的所有工具都是 `_待绑定_`。这就是你需要填入的内容。
+模板中 §5 的所有工具都是 `_待实现_`。这就是你需要填入的内容。
 
 ```markdown
-### Action: branch_lifecycle.branch.create
-
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | _待绑定_ |           ← 你的 CLI 命令 / MCP 工具 / API 端点
-| 输入 (Input) | _待绑定_ |          ← 你的工具需要什么参数
-| 输出 (Output) | _待绑定_ |         ← 你的工具返回什么
-| 消息模板 (Message Template) | _待绑定_ |
-| 依赖 (Requires) | _无_ |
+### on: branch.create
+- 工具: _待实现_           ← 你的 CLI 命令 / MCP 工具 / API 端点
+- 输入: _待实现_          ← 你的工具需要什么参数
+- 输出: _待实现_         ← 你的工具返回什么
+- 消息模板: "_待实现_"
+- 依赖: _无_
 ```
 
 ---
@@ -119,26 +119,38 @@ Phase 3: 所有操作自动化 → 生产就绪
 
 ---
 
-## 5. 第三步：绑定安装
+## 5. 第三步：开发并安装
 
 ### 5.1 创建/加入 Room
 
 ```
 /room create my-project
-/room join my-project @alice
+/room join my-project alice:Alice@local
 ```
 
-### 5.2 运行绑定
+### 5.2 开发 App
 
 ```
 /socialware-app-dev
 ```
 
 Skill 引导你完成：
-1. 选择模板（从 `simulation/contracts/` 中选）
+1. 选择模板（从 `simulation/socialware/` 中选）
 2. 选择 namespace（如 `ew`）
+3. **逐个 Action 绑定工具**（这是核心步骤）
+4. 生成 `.app.md` 到 `simulation/app-store/`（状态：已开发），并在 `simulation/app-store/registry.json` 中创建注册条目
+
+### 5.2b 安装 App 到 Room
+
+```
+/socialware-app-install
+```
+
+Skill 引导你完成：
+1. 选择已开发 App（通过 `simulation/app-store/registry.json` 查询，从 `simulation/app-store/` 中选）
+2. 选择目标 Room
 3. 绑定 Role → Identity（你是谁，队友是谁）
-4. **逐个 Action 绑定工具**（这是核心步骤）
+4. 安装到 Room（生成 `rooms/{room}/socialware-app/{AppName}.{DeveloperName}.{SocialwareName}.app.md`，状态：已安装）
 
 ### 5.3 绑定示例
 
@@ -159,29 +171,26 @@ Action: branch_lifecycle.branch.create
 生成的 §5 绑定：
 
 ```markdown
-### Action: branch_lifecycle.branch.create
-
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | bash: ./ew-cli branch create --name {name} --desc {description} |
-| 输入 (Input) | name: 分支名, description: 分支描述 |
-| 输出 (Output) | branch_id, name, status |
-| 消息模板 (Message Template) | 🌿 @{author} 创建了分支: {name} |
-| 依赖 (Requires) | _无_ |
-| 委托 (Delegates) | _无_ |
-| 资源 (Requests) | _无_ |
+### on: branch.create
+- 工具: bash: ./ew-cli branch create --name {name} --desc {description}
+- 输入: name: 分支名, description: 分支描述
+- 输出: branch_id, name, status
+- 消息模板: "🌿 @{author} 创建了分支: {name}"
+- 依赖: _无_
+- 委托: _无_
+- 资源: _无_
 ```
 
 ---
 
-## 6. 第四步：运行
+## 6. 第五步：运行
 
 ### 6.1 启动
 
 ```
 /socialware-app
 Room: my-project
-Identity: @alice:local
+Identity: alice:Alice@local
 ```
 
 ### 6.2 Hook Pipeline 调用你的工具
@@ -196,7 +205,7 @@ Identity: @alice:local
     │
     ▼
 pre_send (纯契约检查，不涉及你的工具):
-├── Role Check: @alice 持有 R1? ✓
+├── Role Check: alice:Alice@local 持有 R1? ✓
 ├── CBAC Check: any → 通过 ✓
 ├── Flow Check: _none_ → branch.create → active ✓
     │
@@ -225,8 +234,8 @@ after_write (纯数据操作):
 你和队友可以对同一个 Action 使用不同的工具：
 
 ```
-@alice:local (有 ew-cli)              @bob:local (无 ew-cli)
-─────────────────────                 ───────────────────
+alice:Alice@local (有 ew-cli)         bob:Bob@local (无 ew-cli)
+────────────────────────────         ─────────────────────────
 ew:branch.create 绑定:                ew:branch.create 绑定:
   Tool: bash: ./ew-cli branch create    Tool: manual
   (自动执行)                            (手动输入)
@@ -238,8 +247,8 @@ ew:merge.execute 绑定:                ew:merge.execute 绑定:
 
 ### 7.2 规则
 
-- **结果可见**：@bob 可以看到 @alice 的工具产出的消息（Content Object 在 Timeline 中）
-- **工具不共享**：@bob 不能执行 @alice 本地的 CLI
+- **结果可见**：bob:Bob@local 可以看到 alice:Alice@local 的工具产出的消息（Content Object 在 Timeline 中）
+- **工具不共享**：bob:Bob@local 不能执行 alice:Alice@local 本地的 CLI
 - **契约一致**：§1-§4（Role / Flow / Commitment / Arena）对所有 peer 完全相同
 - **只有 §5 不同**：每个 peer 维护自己的 `.app.md` 副本，§5 绑定可以不同
 
@@ -248,11 +257,11 @@ ew:merge.execute 绑定:                ew:merge.execute 绑定:
 每个 peer 在自己的 Room 副本中有自己的 `.app.md`：
 
 ```
-@alice 的 workspace:
-  rooms/my-project/contracts/ew.app.md  → §5 绑定 bash/api
+alice:Alice@local 的 workspace:
+  rooms/my-project/socialware-app/ew.alice.event-weaver.app.md  → §5 绑定 bash/api
 
-@bob 的 workspace:
-  rooms/my-project/contracts/ew.app.md  → §5 绑定 manual
+bob:Bob@local 的 workspace:
+  rooms/my-project/socialware-app/ew.alice.event-weaver.app.md  → §5 绑定 manual
 ```
 
 在 SwSim 模拟环境（共享文件系统）中，两个 peer 使用同一份 `.app.md`——此时以 §5 中更通用的绑定（通常是 `manual`）为准，或者在 §5 中标注 peer-specific 绑定。
@@ -278,14 +287,11 @@ ew:merge.execute 绑定:                ew:merge.execute 绑定:
 **§5 绑定**：
 
 ```markdown
-### Action: branch_lifecycle.branch.create
-
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | bash: ./ew-cli branch create --name {name} --desc {description} |
-| 输入 (Input) | name: 分支名, description: 分支描述 |
-| 输出 (Output) | JSON: { branch_id, name, status, created_at } |
-| 消息模板 (Message Template) | 🌿 @{author} 创建了分支: {name} |
+### on: branch.create
+- 工具: bash: ./ew-cli branch create --name {name} --desc {description}
+- 输入: name: 分支名, description: 分支描述
+- 输出: JSON: { branch_id, name, status, created_at }
+- 消息模板: "🌿 @{author} 创建了分支: {name}"
 ```
 
 **注意**：
@@ -308,14 +314,11 @@ ew:merge.execute 绑定:                ew:merge.execute 绑定:
 **§5 绑定**：
 
 ```markdown
-### Action: branch_lifecycle.branch.create
-
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | mcp: ew-server/create_branch |
-| 输入 (Input) | name: string, description: string |
-| 输出 (Output) | { branch_id: string, name: string, status: string } |
-| 消息模板 (Message Template) | 🌿 @{author} 创建了分支: {name} |
+### on: branch.create
+- 工具: mcp: ew-server/create_branch
+- 输入: name: string, description: string
+- 输出: { branch_id: string, name: string, status: string }
+- 消息模板: "🌿 @{author} 创建了分支: {name}"
 ```
 
 **MCP Server 注册**（在 Claude Code 配置中）：
@@ -351,14 +354,11 @@ ew:merge.execute 绑定:                ew:merge.execute 绑定:
 **§5 绑定**：
 
 ```markdown
-### Action: branch_lifecycle.branch.create
-
-| 属性 | 值 |
-|------|-----|
-| 工具 (Tool) | api: POST http://localhost:9090/api/branches |
-| 输入 (Input) | JSON body: { "name": "{name}", "description": "{description}" } |
-| 输出 (Output) | JSON response: { branch_id, name, status } |
-| 消息模板 (Message Template) | 🌿 @{author} 创建了分支: {name} |
+### on: branch.create
+- 工具: api: POST http://localhost:9090/api/branches
+- 输入: JSON body: { "name": "{name}", "description": "{description}" }
+- 输出: JSON response: { branch_id, name, status }
+- 消息模板: "🌿 @{author} 创建了分支: {name}"
 ```
 
 **注意**：

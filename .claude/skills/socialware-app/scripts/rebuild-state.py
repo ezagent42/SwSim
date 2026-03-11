@@ -9,14 +9,14 @@
 示例:
     python rebuild-state.py simulation/workspace/rooms/project-alpha
 
-    # 指定契约目录（默认读取 room_dir/contracts/）
+    # 指定契约目录（默认读取 room_dir/socialware-app/）
     python rebuild-state.py simulation/workspace/rooms/project-alpha \
-        simulation/workspace/rooms/project-alpha/contracts
+        simulation/workspace/rooms/project-alpha/socialware-app
 
 输入:
     - room_dir/timeline/*.jsonl   — Ref 序列
     - room_dir/config.json        — Room Config（读取 role_map + installed namespaces）
-    - room_dir/contracts/*.app.md — 已安装的契约文件（读取 Flow 转换表和 Commitment）
+    - room_dir/socialware-app/*.app.md — 已安装的契约文件（读取 Flow 转换表和 Commitment）
 
 输出:
     - room_dir/state.json         — 重建的 State Cache
@@ -103,15 +103,22 @@ def parse_contract_commitments(
 ) -> dict[str, dict[str, Any]]:
     """从契约文件解析 §3 Commitments。
 
-    返回: { "ns:commitment_id": { parties, obligation, trigger, deadline } }
+    表格格式（6 列）: | C-ID | 承诺 | 债务人 | 债权人 | 触发条件 | 时限 |
+
+    返回: { "ns:commitment_id": { obligation, debtor, creditor, trigger, deadline } }
     """
     text = contract_path.read_text(encoding="utf-8")
     commitments: dict[str, dict[str, Any]] = {}
 
     in_commitments = False
     in_table = False
+    # 6 列: C-ID | 承诺 | 债务人 | 债权人 | 触发条件 | 时限
     row_pattern = re.compile(
-        r"\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|"
+        r"\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|"
+    )
+    # 兼容 5 列（无时限列的旧格式）
+    row_pattern_5col = re.compile(
+        r"\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|$"
     )
 
     for line in text.splitlines():
@@ -121,24 +128,47 @@ def parse_contract_commitments(
         if in_commitments and line.startswith("## "):
             break
         if in_commitments and line.strip().startswith("|"):
-            row_match = row_pattern.match(line.strip())
+            stripped = line.strip()
+            row_match = row_pattern.match(stripped)
             if row_match:
-                cid, parties, obligation, trigger, deadline = (
+                cid, obligation, debtor, creditor, trigger, deadline = (
                     g.strip() for g in row_match.groups()
                 )
-                if cid in ("ID", "---", "----") or "-" * 3 in cid:
+                if cid in ("ID", "C-ID", "---", "----") or "-" * 3 in cid:
                     in_table = True
                     continue
                 if in_table:
                     commitments[f"{namespace}:{cid}"] = {
-                        "parties": parties,
                         "obligation": obligation,
+                        "debtor": debtor,
+                        "creditor": creditor,
                         "trigger": trigger,
                         "deadline": deadline,
                         "status": "inactive",
                         "triggered_by": None,
                         "triggered_at": None,
                     }
+            else:
+                # 兼容 5 列（无时限）
+                row_match_5 = row_pattern_5col.match(stripped)
+                if row_match_5:
+                    cid, obligation, debtor, creditor, trigger = (
+                        g.strip() for g in row_match_5.groups()
+                    )
+                    if cid in ("ID", "C-ID", "---", "----") or "-" * 3 in cid:
+                        in_table = True
+                        continue
+                    if in_table:
+                        commitments[f"{namespace}:{cid}"] = {
+                            "obligation": obligation,
+                            "debtor": debtor,
+                            "creditor": creditor,
+                            "trigger": trigger,
+                            "deadline": "_待绑定_",
+                            "status": "inactive",
+                            "triggered_by": None,
+                            "triggered_at": None,
+                        }
 
     return commitments
 
@@ -171,16 +201,20 @@ def rebuild_state(room_dir: Path, contract_dir: Path | None = None) -> dict[str,
     支持多 namespace：读取 Room 中所有已安装的 .app.md 契约文件。
     """
     if contract_dir is None:
-        contract_dir = room_dir / "contracts"
+        contract_dir = room_dir / "socialware-app"
 
     # 读取 config.json
     config_path = room_dir / "config.json"
-    role_map: dict[str, list[str]] = {}
-    installed_namespaces: list[str] = []
+    role_map: dict[str, str] = {}
+    installed_items: list[dict[str, str]] = []
+    ns_for_contract: dict[str, str] = {}  # contract filename → namespace
     if config_path.exists():
         config = json.loads(config_path.read_text(encoding="utf-8"))
-        role_map = config.get("socialware", {}).get("roles", {})
-        installed_namespaces = config.get("socialware", {}).get("installed", [])
+        role_map = config.get("socialware-app", {}).get("roles", {})
+        installed_items = config.get("socialware-app", {}).get("installed", [])
+        for item in installed_items:
+            if isinstance(item, dict) and "contract" in item and "namespace" in item:
+                ns_for_contract[item["contract"]] = item["namespace"]
 
     # 解析所有已安装契约的 Flow 和 Commitment
     all_flows: dict[str, dict[tuple[str, str], tuple[str, str]]] = {}
@@ -188,11 +222,13 @@ def rebuild_state(room_dir: Path, contract_dir: Path | None = None) -> dict[str,
 
     if contract_dir.exists():
         for contract_file in contract_dir.glob("*.app.md"):
-            # 从文件名提取 namespace（{ns}.app.md → ns）
-            ns = contract_file.stem.replace(".app", "")
-            if ns not in installed_namespaces:
-                # 宽容模式：如果 config 中没有列出，也尝试解析
-                installed_namespaces.append(ns)
+            # 从 config.json 的 installed 映射中查找 namespace
+            filename = contract_file.name
+            if filename in ns_for_contract:
+                ns = ns_for_contract[filename]
+            else:
+                # 宽容模式：如果 config 中没有映射，从文件名推断
+                ns = contract_file.stem.replace(".app", "")
             flows = parse_contract_flows(contract_file, ns)
             all_flows.update(flows)
             commitments = parse_contract_commitments(contract_file, ns)

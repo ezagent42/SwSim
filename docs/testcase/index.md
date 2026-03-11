@@ -37,7 +37,7 @@ Layer 5: 端到端            — 从零到完整协作的全链路
 |----|------|---------|------|
 | [TC-001](TC-001-socialware-dev.md) | Socialware 模板设计 | `/socialware-dev` 生成有效的 `.socialware.md` | 无 |
 | [TC-002](TC-002-room-management.md) | Room 管理 | `/room` 的 create/list/show/join 全流程 | 无 |
-| [TC-003](TC-003-app-binding.md) | App 绑定安装 | `/socialware-app-dev` 完整绑定流程 | TC-001, TC-002 |
+| [TC-003](TC-003-app-binding.md) | App 开发与安装 | `/socialware-app-dev` + `/socialware-app-install` 完整流程 | TC-001, TC-002 |
 
 ### Layer 2: 集成链路
 
@@ -80,6 +80,7 @@ Layer 5: 端到端            — 从零到完整协作的全链路
 | `/socialware-dev` | TC-001 | TC-013 |
 | `/room` | TC-002 | TC-009, TC-013 |
 | `/socialware-app-dev` | TC-003 | TC-009, TC-013 |
+| `/socialware-app-install` | TC-003 | TC-009, TC-013 |
 | `/socialware-app` | TC-004~TC-012 | TC-013 |
 
 ### Spec 覆盖
@@ -87,8 +88,8 @@ Layer 5: 端到端            — 从零到完整协作的全链路
 | Spec | 覆盖测试 |
 |------|---------|
 | 001 Architecture | TC-005, TC-009, TC-010 |
-| 002 Contract | TC-001 |
-| 003 App Contract | TC-003, TC-004 |
+| 002 Contract | TC-001, TC-006, TC-011 |
+| 003 App Contract | TC-003, TC-004, TC-006, TC-011 |
 | 004 Local Apps | TC-005 |
 | 005 User Journey | TC-013 |
 | 006 P2P Simulation | TC-007, TC-008 |

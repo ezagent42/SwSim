@@ -9,12 +9,13 @@
 ## 1. 旅程总览
 
 ```
-创建/加入 Room  →  浏览 Socialware  →  安装 App  →  运行 App  →  多方协作
-     │                  │                 │              │            │
-   /room         contracts/目录    /socialware-app-dev  /socialware-app  /switch
+创建 Room  →  设计模板  →  开发 App  →  安装 App  →  运行 App  →  多方协作
+    │             │            │              │            │            │
+  /room    /socialware-dev  /socialware-   /socialware-   /socialware-  /switch
+                            app-dev        app-install    app
 ```
 
-本文档覆盖一个 P2P 节点从创建 Room 到运行 App 的完整用户旅程。
+本文档覆盖一个 P2P 节点从创建 Room 到运行 App 的完整用户旅程。`/room` 是身份创建入口，也是流程的第一步。
 
 ---
 
@@ -28,7 +29,7 @@ Room 是协作空间，是所有 Socialware 运行的容器。
 
 ```
 simulation/workspace/rooms/{name}/
-├── contracts/       ← 已安装的 App 契约
+├── socialware-app/  ← 已安装的 App 契约
 ├── config.json      ← Room 配置（成员、namespace 注册）
 ├── state.json       ← 状态缓存（初始为空）
 ├── timeline/        ← Append-only 时间线
@@ -42,15 +43,15 @@ simulation/workspace/rooms/{name}/
 {
   "room_id": "room-{name}-001",
   "name": "{Name}",
-  "created_by": "@{creator}:local",
+  "created_by": "{creator}:{Creator}@local",
   "created_at": "{ISO 8601}",
   "membership": {
     "policy": "invite",
     "members": {
-      "@{creator}:local": "owner"
+      "{creator}:{Creator}@local": "owner"
     }
   },
-  "socialware": {
+  "socialware-app": {
     "installed": [],
     "roles": {}
   }
@@ -95,21 +96,21 @@ Room: alpha
 创建时间: 2026-03-09T10:00:00Z
 
 成员:
-  @alice:local (Alice) — joined 2026-03-09
-  @bob:local (Bob) — joined 2026-03-09
+  alice:Alice@local — joined 2026-03-09
+  bob:Bob@local — joined 2026-03-09
 
 已安装 Socialware:
   ta — TaskArena (two-role-submit-approve.socialware.md)
-       R1(提交者) → @alice:local
-       R2(审批者) → @bob:local
+       R1(提交者) → alice:Alice@local
+       R2(审批者) → bob:Bob@local
   ew — EventWeaver (event-weaver.socialware.md)
-       R1(开发者) → @alice:local
-       R2(审查者) → @bob:local
-       R3(合并者) → @alice:local
+       R1(开发者) → alice:Alice@local
+       R2(审查者) → bob:Bob@local
+       R3(合并者) → alice:Alice@local
 
 活跃 Flow Instances (显示格式, state.json 中 key 为 ref_id):
-  msg-001 [ta:task_lifecycle] — submitted (by @alice, clock: 1)
-  msg-003 [ew:branch_lifecycle] — open (by @alice, clock: 3)
+  msg-001 [ta:task_lifecycle] — submitted (by alice, clock: 1)
+  msg-003 [ew:branch_lifecycle] — open (by alice, clock: 3)
 
 Lamport Clock: 5
 ```
@@ -121,27 +122,43 @@ Lamport Clock: 5
 ```json
 // config.json 中 membership.members 新增条目:
 {
-  "@charlie:local": "member"
+  "charlie:Charlie@local": "member"
 }
 ```
 
 ---
 
-## 3. 浏览可用 Socialware
+## 3. 设计 Socialware 模板（`/socialware-dev` Skill）
 
-### 3.1 模板目录
+如果 `simulation/socialware/` 中没有合适的模板，用户需要先设计一个。
 
-所有可用的 Socialware 模板存放在 `simulation/contracts/`：
+### 3.1 设计流程
+
+使用 `/socialware-dev` 通过引导式 Q&A 定义组织结构（Role, Flow, Commitment, Arena），生成 `.socialware.md` 模板文件。
+
+**前置条件**：需要身份（由 `/room create` 创建）。
+
+**产出**：`simulation/socialware/{name}.socialware.md`（状态: 模板，§5 全部 `_待实现_`，§1 全部 `_待绑定_`）
+
+**完成后**：下一步用 `/socialware-app-dev` 基于此模板开发 App。
+
+---
+
+## 4. 浏览可用 Socialware
+
+### 4.1 模板目录
+
+所有可用的 Socialware 模板存放在 `simulation/socialware/`：
 
 ```
-simulation/contracts/
+simulation/socialware/
 ├── two-role-submit-approve.socialware.md    ← 双角色提交-审批
 ├── event-weaver.socialware.md               ← 代码协作工作流
 ├── resource-pool.socialware.md              ← 资源管理
 └── standup.socialware.md                    ← 每日站会
 ```
 
-### 3.2 模板即产品
+### 4.2 模板即产品
 
 每个 `.socialware.md` 是一个**可分发的产品**：
 
@@ -150,7 +167,7 @@ simulation/contracts/
 - **可复用**：同一模板可在多个 Room 中以不同 namespace 安装
 - **自描述**：模板文件本身包含完整的组织定义
 
-### 3.3 阅读模板
+### 4.3 阅读模板
 
 浏览模板时关注：
 
@@ -158,23 +175,23 @@ simulation/contracts/
 2. **§2 Flows**：工作流的状态转换是什么？
 3. **§3 Commitments**：角色间有什么义务？
 4. **§4 Arena**：准入策略是什么？
-5. **§5 Context Bindings**：需要绑定哪些依赖？（`_待绑定_` vs `_无_`）
+5. **§5 Context Bindings**：需要绑定哪些依赖？（`_待实现_` vs `_无_`）
 
 ---
 
-## 4. 安装 Socialware 到 Room（`/socialware-app-dev` Skill）
+## 5. 开发 Socialware App（`/socialware-app-dev` Skill）
 
-### 4.1 安装流程
+### 5.1 开发流程
 
 ```
-选择模板                选择 Room + Namespace         绑定                    完成
-────────               ─────────────────────         ────                    ────
-从 contracts/ 选模板    指定目标 Room + namespace 前缀  绑定 Identity + Tool    生成 .app.md + 更新 config.json
+选择模板                选择 Namespace         绑定工具                 完成
+────────               ─────────────         ────────                ────
+从 socialware/ 选模板   选 namespace 前缀      绑定 Tool + 跨契约引用   生成 .app.md 到 app-store
 ```
 
-### 4.2 Step 1 — 选择模板
+### 5.2 Step 1 — 选择模板
 
-从 `simulation/contracts/` 中选择一个 `.socialware.md` 模板。
+从 `simulation/socialware/` 中选择一个 `.socialware.md` 模板。
 
 ```
 可用模板:
@@ -185,27 +202,17 @@ simulation/contracts/
 选择: 1
 ```
 
-### 4.3 Step 2 — 选择 Namespace
+### 5.3 Step 2 — 选择 Namespace
 
-为 App 选择一个 namespace 前缀（短缩写，在 Room 内唯一）。
+为 App 选择一个 namespace 前缀（短缩写）。
 
 ```
 Namespace 前缀 (2-4个字符): ta
 ```
 
-**注意**：模板名和 namespace 是解耦的。模板 `two-role-submit-approve.socialware.md` 可以安装为 namespace `ta`。
+**注意**：模板名和 namespace 是解耦的。模板 `two-role-submit-approve.socialware.md` 可以开发为 namespace `ta`。
 
-### 4.4 Step 3 — 绑定 Identity 到 Role
-
-将 Room 中的成员绑定到模板定义的角色：
-
-```
-角色绑定:
-  R1 (提交者) → @alice:local
-  R2 (审批者) → @bob:local
-```
-
-### 4.5 Step 4 — 绑定 Tool 到 Action
+### 5.4 Step 3 — 绑定 Tool 到 Action
 
 为每个 Action 选择工具类型和具体绑定：
 
@@ -217,9 +224,9 @@ Namespace 前缀 (2-4个字符): ta
   task_lifecycle.revise  → manual
 ```
 
-### 4.6 Step 5 — 填写跨契约引用
+### 5.5 Step 4 — 填写跨契约引用
 
-如果 §5 中有 `_待绑定_` 的依赖/委托/资源，填入具体引用：
+如果 §5 中有 `_待实现_` 的依赖/委托/资源，填入具体引用：
 
 ```
 跨契约引用:
@@ -228,16 +235,51 @@ Namespace 前缀 (2-4个字符): ta
   (其他均为 _无_)
 ```
 
-### 4.7 Step 6 — 生成文件
+### 5.6 Step 5 — 生成文件
 
-- 生成 `workspace/rooms/{room}/contracts/{ns}.app.md`
-- 更新 `workspace/rooms/{room}/config.json`（添加 namespace 到 `socialware.installed`，添加 role_map）
+- 生成 `simulation/app-store/{AppName}.{DeveloperName}.{SocialwareName}.app.md`（状态：已开发，§1 Holder 仍为 `_待绑定_`）
+- 在 `simulation/app-store/registry.json` 中创建注册条目
 
 ---
 
-## 5. 运行 App（`/socialware-app` Skill）
+## 6. 安装 App 到 Room（`/socialware-app-install` Skill）
 
-### 5.1 启动
+### 6.1 安装流程
+
+```
+选择 App              选择 Room           绑定 Identity          完成
+────────             ────────            ──────────            ────
+从 registry.json 选 App  指定目标 Room     绑定 Identity 到 Role   安装到 Room + 更新 config.json
+```
+
+### 6.2 Step 1 — 选择已开发 App
+
+从 `simulation/app-store/` 中选择一个已开发的 `.app.md`（通过 `simulation/app-store/registry.json` 查询可用 App）。
+
+### 6.3 Step 2 — 选择目标 Room
+
+指定安装到哪个 Room。
+
+### 6.4 Step 3 — 绑定 Identity 到 Role
+
+将 Room 中的成员绑定到模板定义的角色（§1 `_待绑定_` → 具体 Identity）：
+
+```
+角色绑定:
+  R1 (提交者) → alice:Alice@local
+  R2 (审批者) → bob:Bob@local
+```
+
+### 6.5 Step 4 — 生成文件
+
+- 生成 `workspace/rooms/{room}/socialware-app/{AppName}.{DeveloperName}.{SocialwareName}.app.md`（状态：已安装）
+- 更新 `workspace/rooms/{room}/config.json`（添加 namespace 到 `socialware-app.installed`，添加 role_map）
+
+---
+
+## 7. 运行 App（`/socialware-app` Skill）
+
+### 7.1 启动
 
 指定 Room 和 Identity 启动 App Runtime：
 
@@ -245,10 +287,10 @@ Namespace 前缀 (2-4个字符): ta
 /socialware-app
 
 Room: alpha
-Identity: @alice:local
+Identity: alice:Alice@local
 ```
 
-### 5.2 启动面板
+### 7.2 启动面板
 
 启动后显示当前状态面板：
 
@@ -257,7 +299,7 @@ Identity: @alice:local
 ║  Socialware App Runtime                          ║
 ║──────────────────────────────────────────────────║
 ║  Room:     alpha                                 ║
-║  Identity: @alice:local                          ║
+║  Identity: alice:Alice@local                     ║
 ║  Clock:    5                                     ║
 ║──────────────────────────────────────────────────║
 ║  你的角色:                                        ║
@@ -278,7 +320,7 @@ Identity: @alice:local
 ╚══════════════════════════════════════════════════╝
 ```
 
-### 5.3 交互模式
+### 7.3 交互模式
 
 用户用自然语言或命令与 App 交互：
 
@@ -293,7 +335,7 @@ Identity: @alice:local
 
 执行 Hook Pipeline:
   pre_send:
-    ✓ Role Check: @alice 持有 R1
+    ✓ Role Check: alice 持有 R1
     ✓ CBAC Check: any → 通过
     ✓ Flow Check: _none_ → submit → submitted
   execute:
@@ -303,26 +345,26 @@ Identity: @alice:local
   after_write:
     ✓ Append Ref → timeline/shard-001.jsonl (clock: 6)
     ✓ Update State: flow_states["msg-006"] = { flow: "ta:task_lifecycle", state: "submitted" }
-    ✓ Broadcast: 通知 @bob
+    ✓ Broadcast: 通知 bob
 
 结果:
-  📋 @alice:local 提交了任务: 实现用户认证模块
+  📋 alice:Alice@local 提交了任务: 实现用户认证模块
 ```
 
-### 5.4 消息持久化
+### 7.4 消息持久化
 
 所有消息持久化到 Timeline（append-only JSONL）。State 从 Timeline 纯推导。
 
 ```
 timeline/shard-001.jsonl:
-{"ref_id":"msg-006","author":"@alice:local","content_type":"immutable","content_id":"sha256:f4d5e6","created_at":"2026-03-09T14:00:00Z","status":"active","clock":6,"signature":"sim:not-verified","ext":{"reply_to":null,"command":{"namespace":"ta","action":"task.submit","invoke_id":"inv-006"},"channels":["main"]}}
+{"ref_id":"msg-006","author":"alice:Alice@local","content_type":"immutable","content_id":"sha256:f4d5e6","created_at":"2026-03-09T14:00:00Z","status":"active","clock":6,"signature":"sim:not-verified","ext":{"reply_to":null,"command":{"namespace":"ta","action":"task.submit","invoke_id":"inv-006"},"channels":["main"]}}
 ```
 
 ---
 
-## 6. 多方协作（Multi-Peer Collaboration）
+## 8. 多方协作（Multi-Peer Collaboration）
 
-### 6.1 Multi-Session 模式（推荐）
+### 8.1 Multi-Session 模式（推荐）
 
 每个参与者开启独立的 Claude Code session，共享 `simulation/workspace/` 文件系统：
 
@@ -332,7 +374,7 @@ Terminal A (Alice)                    Terminal B (Bob)
 $ claude                              $ claude
 /socialware-app                       /socialware-app
 Room: alpha                           Room: alpha
-Identity: @alice:local                Identity: @bob:local
+Identity: alice:Alice@local           Identity: bob:Bob@local
 
 Alice 提交任务                         Bob 看到新消息（通过读取 timeline）
   → Timeline 追加 entry                 → 审批任务
@@ -345,21 +387,21 @@ Alice 提交任务                         Bob 看到新消息（通过读取 ti
 - 共享 state.json = 状态同步
 - 文件锁 = 并发控制
 
-### 6.2 Single-Session 模式（Fallback）
+### 8.2 Single-Session 模式（Fallback）
 
 单个 session 使用 `/switch` 切换身份：
 
 ```
-/switch @alice:local
+/switch alice:Alice@local
 > 我是 Alice，提交任务...
 (执行 ta:submit → Timeline 追加 entry)
 
-/switch @bob:local
+/switch bob:Bob@local
 > 我是 Bob
 
-收件箱 (自上次 @bob 操作以来的新消息):
+收件箱 (自上次 bob 操作以来的新消息):
 ──────────────────────────────────────
-  [clock:6] 📋 @alice:local 提交了任务: 实现用户认证模块
+  [clock:6] 📋 alice:Alice@local 提交了任务: 实现用户认证模块
 
 > 审批这个任务，意见是"方案可行"
 (执行 ta:approve → Timeline 追加 entry)
@@ -369,7 +411,7 @@ Alice 提交任务                         Bob 看到新消息（通过读取 ti
 - 切换身份时，显示自上次该 Identity 操作以来的所有新 Timeline entries
 - 基于 `peer_cursors` 跟踪每个 peer 的最后已读 clock
 
-### 6.3 新消息发现
+### 8.3 新消息发现
 
 无论哪种模式，新消息的发现机制：
 
@@ -379,9 +421,9 @@ Alice 提交任务                         Bob 看到新消息（通过读取 ti
 
 ---
 
-## 7. 跨 Namespace 交互
+## 9. 跨 Namespace 交互
 
-### 7.1 同一 Room 内的跨 Namespace
+### 9.1 同一 Room 内的跨 Namespace
 
 同一 Room 中安装了多个 Socialware，它们的 flow_states 共存于一个 state.json：
 
@@ -394,7 +436,7 @@ Alice 提交任务                         Bob 看到新消息（通过读取 ti
   → ew:branch_lifecycle.merge
 
 pre_send:
-  ✓ Role Check: @alice 持有 ew:R3 (合并者)
+  ✓ Role Check: alice 持有 ew:R3 (合并者)
   ✓ CBAC Check: any → 通过
   ✓ Flow Check: open → merge → merged
   ✓ Cross-NS Check:
@@ -410,7 +452,7 @@ after_write:
   ✓ Update State: flow_states["msg-003"].state = "merged"
 ```
 
-### 7.2 跨 Namespace 查询
+### 9.2 跨 Namespace 查询
 
 所有查询都在同一个 state.json 内，使用不同的 namespace 前缀：
 
@@ -440,9 +482,9 @@ ta_committed = any(
 
 ---
 
-## 8. Hot Restart — 热重启
+## 10. Hot Restart — 热重启
 
-### 8.1 基本热重启
+### 10.1 基本热重启
 
 关闭 session → 重新打开 → 用 `/socialware-app` 重新启动：
 
@@ -453,20 +495,20 @@ ta_committed = any(
 $ claude
 /socialware-app
 Room: alpha
-Identity: @alice:local
+Identity: alice:Alice@local
 
 # Timeline 持久化 → State 从文件加载 → 继续运行
 # 启动面板显示最新状态
 ```
 
-### 8.2 修改契约后热重启
+### 10.2 修改契约后热重启
 
 可以修改契约/Hook 逻辑，然后重启：
 
 ```
 步骤:
 1. 关闭当前 session
-2. 编辑 contracts/ta.app.md（修改 Flow 或绑定）
+2. 编辑 socialware-app/task-arena.alice.two-role-submit-approve.app.md（修改 Flow 或绑定）
 3. 重新启动 /socialware-app
 4. 重放 Timeline → 新逻辑生效
 ```
@@ -475,9 +517,9 @@ Identity: @alice:local
 
 ---
 
-## 9. State Rebuild — 状态重建（`/rebuild`）
+## 11. State Rebuild — 状态重建（`/rebuild`）
 
-### 9.1 重建流程
+### 11.1 重建流程
 
 ```
 /rebuild
@@ -500,7 +542,7 @@ Identity: @alice:local
   ✓ 恢复了 3 个 active commitments
 ```
 
-### 9.2 CRDT 证明
+### 11.2 CRDT 证明
 
 State Rebuild 证明了 CRDT 属性：
 
@@ -518,7 +560,7 @@ State = f(Timeline)
 - **跨 Peer 一致性**：所有 peer 从相同 Timeline 推导出相同 State
 - **调试友好**：怀疑 State 不对？删除重建即可验证
 
-### 9.3 重建脚本
+### 11.3 重建脚本
 
 完整实现见 `.claude/skills/socialware-app/scripts/rebuild-state.py`。
 
@@ -527,14 +569,14 @@ State = f(Timeline)
 python .claude/skills/socialware-app/scripts/rebuild-state.py \
     simulation/workspace/rooms/project-alpha
 
-# 指定契约目录（默认读取 room 内的 contracts/）
+# 指定契约目录（默认读取 room 内的 socialware-app/）
 python .claude/skills/socialware-app/scripts/rebuild-state.py \
     simulation/workspace/rooms/project-alpha \
-    simulation/workspace/rooms/project-alpha/contracts
+    simulation/workspace/rooms/project-alpha/socialware-app
 ```
 
 核心逻辑：
-1. 读取 Room 中所有 `contracts/*.app.md`，解析每个 namespace 的 §2 Flow 转换表和 §3 Commitments
+1. 读取 Room 中所有 `socialware-app/*.app.md`，解析每个 namespace 的 §2 Flow 转换表和 §3 Commitments
 2. 读取 `timeline/*.jsonl`，按 Lamport clock 排序
 3. 逐条重放：
    - subject 动作（`reply_to=null`）→ 创建新 flow instance
@@ -546,7 +588,7 @@ python .claude/skills/socialware-app/scripts/rebuild-state.py \
 
 ---
 
-## 10. 完整用户旅程示例
+## 12. 完整用户旅程示例
 
 以下是 Alice 和 Bob 从零开始的完整旅程：
 
@@ -557,44 +599,51 @@ Alice> /room create alpha
 
 === Step 2: Bob 加入 Room ===
 Bob> /room join alpha
-✓ @bob:local 已加入 Room "alpha"
+✓ bob:Bob@local 已加入 Room "alpha"
 
 === Step 3: Alice 浏览模板 ===
-Alice> ls simulation/contracts/
+Alice> ls simulation/socialware/
   1. two-role-submit-approve.socialware.md
 
-=== Step 4: Alice 安装 Socialware ===
+=== Step 4: Alice 开发 Socialware App ===
 Alice> /socialware-app-dev
 模板: two-role-submit-approve.socialware.md
+AppName: task-arena
+工具绑定: 全部 manual
+✓ task-arena.alice.two-role-submit-approve.app.md 已保存到 app-store
+✓ registry.json 已更新
+
+=== Step 4b: Alice 安装 App 到 Room ===
+Alice> /socialware-app-install
+App: task-arena.alice.two-role-submit-approve.app.md (from app-store)
 Room: alpha
 Namespace: ta
-角色绑定: R1 → @alice:local, R2 → @bob:local
-工具绑定: 全部 manual
-✓ ta.app.md 已安装到 Room "alpha"
+角色绑定: R1 → alice:Alice@local, R2 → bob:Bob@local
+✓ task-arena.alice.two-role-submit-approve.app.md 已安装到 Room "alpha"
 
 === Step 5: Alice 运行 App ===
 Alice> /socialware-app
-Room: alpha, Identity: @alice:local
+Room: alpha, Identity: alice:Alice@local
 (显示启动面板)
 
 Alice> 提交任务：实现用户认证
-✓ 📋 @alice:local 提交了任务: 实现用户认证 (clock: 1)
+✓ 📋 alice:Alice@local 提交了任务: 实现用户认证 (clock: 1)
 
 === Step 6: Bob 运行 App ===
 Bob> /socialware-app
-Room: alpha, Identity: @bob:local
+Room: alpha, Identity: bob:Bob@local
 
 收件箱:
-  [clock:1] 📋 @alice:local 提交了任务: 实现用户认证
+  [clock:1] 📋 alice:Alice@local 提交了任务: 实现用户认证
 
 Bob> 审批通过，方案可行
-✓ ✅ @bob:local 审批通过: 方案可行 (clock: 2)
+✓ ✅ bob:Bob@local 审批通过: 方案可行 (clock: 2)
 
 === Step 7: Alice 看到审批结果 ===
 Alice> (刷新/重连)
 
 收件箱:
-  [clock:2] ✅ @bob:local 审批通过: 方案可行
+  [clock:2] ✅ bob:Bob@local 审批通过: 方案可行
 
 任务 task-001 状态: approved ✓
 

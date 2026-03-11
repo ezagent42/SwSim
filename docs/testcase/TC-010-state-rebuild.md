@@ -11,7 +11,7 @@
 
 ### Step 1: 执行若干操作产生丰富 Timeline
 
-- **操作**：@alice submit(msg-001) → @bob approve(msg-002) → @alice submit(msg-003) → @bob reject(msg-004) → @alice revise(msg-005) → @bob approve(msg-006)
+- **操作**：alice submit(msg-001) → bob approve(msg-002) → alice submit(msg-003) → bob reject(msg-004) → alice revise(msg-005) → bob approve(msg-006)
 - **前置依赖**：TC-003 已完成
 - **验证**：Timeline 包含 6 条记录
 - **验收标准**：
@@ -57,8 +57,8 @@
 - **前置依赖**：Step 3
 - **验证**：每个 flow instance 的状态正确
 - **验收标准**：
-  - msg-001: `flow`=`da:task_lifecycle`, `state`=`approved`, `subject_author`=`@alice:local`
-  - msg-003: `flow`=`da:task_lifecycle`, `state`=`approved`, `subject_author`=`@alice:local`
+  - msg-001: `flow`=`da:task_lifecycle`, `state`=`approved`, `subject_author`=`alice:Alice@local`
+  - msg-003: `flow`=`da:task_lifecycle`, `state`=`approved`, `subject_author`=`alice:Alice@local`
   - 每个 instance 的 `last_action` 和 `last_ref` 指向最后执行的操作
 
 ### Step 6: 验证 Commitment 重建
@@ -73,7 +73,7 @@
 
 ### Step 7: 重建后继续运行
 
-- **操作**：重建完成后，@alice 提交新任务
+- **操作**：重建完成后，alice 提交新任务
 - **前置依赖**：Step 3
 - **验证**：重建后的 state 可正常用于后续操作
 - **验收标准**：
@@ -109,7 +109,7 @@
 - **前置依赖**：Step 1
 - **验证**：脚本输出与 /rebuild 命令结果一致
 - **验收标准**：
-  - 脚本正确读取所有 `contracts/*.app.md`
+  - 脚本正确读取所有 `socialware-app/*.app.md`（文件名格式为 `{AppName}.{DeveloperName}.{SocialwareName}.app.md`）
   - 脚本正确解析 `timeline/*.jsonl`
   - 脚本按 clock 排序重放
   - 输出的 state.json 与 /rebuild 命令结果完全一致

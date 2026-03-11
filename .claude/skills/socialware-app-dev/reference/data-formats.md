@@ -10,21 +10,63 @@ simulation/workspace/
 
 ## Identity
 
-路径: `identities/@{entity}.json`（全局）+ `rooms/{room}/identities/@{entity}.json`（Room 成员引用）
+路径: `identities/{username}@{namespace}.json`（全局）+ `rooms/{room}/identities/{username}@{namespace}.json`（Room 成员引用）——文件名省略 nickname（避免 `:` 文件系统问题），JSON 内 `entity_id` 使用完整格式 `{username}:{nickname}@{namespace}`
 
-映射: `ezagent/@{entity_id}/identity/pubkey`
+映射: `ezagent/{entity_id}/identity/pubkey`
 
 ```json
 {
-  "entity_id": "@alice:local",
+  "entity_id": "alice:Alice@local",
   "pubkey_sim": "sim:ed25519:alice-pubkey",
   "created_at": "2026-03-09T10:00:00Z"
 }
 ```
 
-- `entity_id` 格式: `@{local_part}:{domain}`，模拟中 domain 统一用 `local`
+- `entity_id` 格式: `{username}:{nickname}@{namespace}`，模拟中 namespace 统一用 `local`
 - `pubkey_sim`: 模拟签名，不做真 Ed25519
 - 全局 identity 在 `workspace/identities/`，Room 成员引用在 `rooms/{room}/identities/`
+
+## App Store
+
+路径: `simulation/app-store/{app-id}.app.md`
+
+已开发但尚未安装的 Socialware App。§5 工具已填，§1 持有者为 `_待绑定_`。
+
+- App-ID 格式: `{AppName}.{DeveloperName}.{SocialwareName}`（如 `doc-review.alice.two-role-submit-approve`）
+- 由 `/socialware-app-dev` 生成
+- 由 `/socialware-app-install` 读取并安装到 Room
+
+## App Registry
+
+路径: `simulation/app-store/registry.json`
+
+记录所有已开发 App 的注册信息。由 `/socialware-app-dev` 在创建 App 后通过 `register-app.py` 脚本写入。`/socialware-app-install` 读取此文件列出可安装的 App。
+
+```json
+{
+  "version": 1,
+  "apps": {
+    "doc-review.alice.two-role-submit-approve": {
+      "app_id": "doc-review.alice.two-role-submit-approve",
+      "socialware": "two-role-submit-approve",
+      "developer": "alice:Alice@local",
+      "created_at": "2026-03-11T10:00:00Z",
+      "app_file": "doc-review.alice.two-role-submit-approve.app.md",
+      "description": "文档审批工作流"
+    }
+  }
+}
+```
+
+字段说明:
+- `version`: 注册表版本号
+- `apps`: app-id → App 信息的映射
+  - `app_id`: `{AppName}.{DeveloperName}.{SocialwareName}` 格式
+  - `socialware`: 模板名（不含 `.socialware.md` 扩展名）
+  - `developer`: 开发者身份（`{username}:{nickname}@{namespace}` 格式）
+  - `created_at`: ISO8601 创建时间
+  - `app_file`: App 文件名（在 `simulation/app-store/` 中）
+  - `description`: 简要描述
 
 ## Room Config
 
@@ -36,20 +78,35 @@ simulation/workspace/
 {
   "room_id": "room-{name}-001",
   "name": "{Name}",
-  "created_by": "@alice:local",
+  "created_by": "alice:Alice@local",
   "created_at": "2026-03-09T10:00:00Z",
   "membership": {
     "policy": "invite",
     "members": {
-      "@alice:local": "owner",
-      "@bob:local": "member"
+      "alice:Alice@local": "owner",
+      "bob:Bob@local": "member"
     }
   },
-  "socialware": {
-    "installed": ["ew", "ta", "rp"],
+  "socialware-app": {
+    "installed": [
+      {
+        "app_id": "eng-flow.alice.engineering-workflow",
+        "namespace": "ew",
+        "contract": "eng-flow.alice.engineering-workflow.app.md",
+        "template": "engineering-workflow.socialware.md"
+      },
+      {
+        "app_id": "task-mgmt.alice.task-assignment",
+        "namespace": "ta",
+        "contract": "task-mgmt.alice.task-assignment.app.md",
+        "template": "task-assignment.socialware.md"
+      }
+    ],
     "roles": {
-      "@alice:local": ["ew:emitter", "ew:brancher", "ta:poster"],
-      "@bob:local": ["ew:merger", "ew:admin", "ta:reviewer", "rp:allocator"]
+      "ew:R1": "alice:Alice@local",
+      "ew:R2": "bob:Bob@local",
+      "ta:R1": "alice:Alice@local",
+      "ta:R2": "bob:Bob@local"
     }
   }
 }
@@ -58,8 +115,8 @@ simulation/workspace/
 字段说明:
 - `membership.policy`: `open` | `knock` | `invite`（映射 Arena §4）
 - `membership.members`: entity → room role（`owner` | `admin` | `member`）
-- `socialware.installed`: 已安装 Socialware 的 namespace 列表
-- `socialware.roles`: entity → Socialware Role 列表（namespace:role 格式）
+- `socialware-app.installed`: 已安装 App 的对象数组（app_id + namespace + contract 文件名 + 模板来源）
+- `socialware-app.roles`: `{ns}:{R-ID}` → entity 映射（如 `"ew:R1": "alice:Alice@local"`）
 
 ## Ref（Timeline 条目）
 
@@ -70,7 +127,7 @@ simulation/workspace/
 ```json
 {
   "ref_id": "msg-001",
-  "author": "@alice:local",
+  "author": "alice:Alice@local",
   "content_type": "immutable",
   "content_id": "sha256:a1b2c3",
   "created_at": "2026-03-09T10:00:00Z",
@@ -112,7 +169,7 @@ Flow 实例关联规则:
 {
   "content_id": "sha256:a1b2c3",
   "type": "immutable",
-  "author": "@alice:local",
+  "author": "alice:Alice@local",
   "body": {
     "name": "hotfix",
     "description": "紧急修复分支"
@@ -142,7 +199,7 @@ Flow 实例关联规则:
       "flow": "ew:branch_lifecycle",
       "state": "active",
       "subject_action": "branch.create",
-      "subject_author": "@alice:local",
+      "subject_author": "alice:Alice@local",
       "last_action": "branch.create",
       "last_ref": "msg-001"
     },
@@ -150,14 +207,16 @@ Flow 实例关联规则:
       "flow": "ta:task_lifecycle",
       "state": "claimed",
       "subject_action": "task.post",
-      "subject_author": "@alice:local",
+      "subject_author": "alice:Alice@local",
       "last_action": "task.claim",
       "last_ref": "msg-004"
     }
   },
   "role_map": {
-    "@alice:local": ["ew:emitter", "ew:brancher", "ta:poster"],
-    "@bob:local": ["ew:merger", "ew:observer", "ta:reviewer"]
+    "ew:R1": "alice:Alice@local",
+    "ew:R2": "bob:Bob@local",
+    "ta:R1": "alice:Alice@local",
+    "ta:R2": "bob:Bob@local"
   },
   "commitments": {
     "ew:C1": {
@@ -173,8 +232,8 @@ Flow 实例关联规则:
   },
   "last_clock": 5,
   "peer_cursors": {
-    "@alice:local": 5,
-    "@bob:local": 2
+    "alice:Alice@local": 5,
+    "bob:Bob@local": 2
   }
 }
 ```
@@ -183,10 +242,30 @@ Flow 实例关联规则:
 - `flow_states`: flow instance ID (= subject Ref 的 ref_id) → 当前状态
   - `flow`: namespace:flow_name 格式（跨 namespace 可区分）
   - `subject_author`: Flow 创建者（用于 CBAC 验证）
-- `role_map`: 从 config.json 的 `socialware.roles` 复制（不随 timeline 变化）
+- `role_map`: `{ns}:{R-ID}` → entity 映射，从 config.json 的 `socialware-app.roles` 复制（不随 timeline 变化）
 - `commitments`: namespace:commitment_id → 状态（`inactive` | `active` | `fulfilled` | `violated`）
 - `last_clock`: 当前最大 Lamport clock
 - `peer_cursors`: 每个 identity 上次"在线"时见过的最大 clock
+
+## Active Session
+
+路径: `workspace/rooms/{room}/.session.{username}.json`（per-room per-identity）
+
+Runtime 会话标记，由 `/socialware-app` 启动时创建，`/quit` 退出时删除。`check-inbox.sh` hook 扫描所有 `rooms/*/.session.*.json` 检查 inbox。支持多 peer 同时运行，互不干扰。
+
+```json
+{
+  "room": "project-alpha",
+  "identity": "alice:Alice@local",
+  "started_at": "2026-03-10T10:00:00Z"
+}
+```
+
+生命周期:
+- **创建**: `/socialware-app` 启动时
+- **删除**: `/quit` 退出时
+- **清理残留**: `/room clean-sessions`（用户未执行 `/quit` 直接关闭终端时使用）
+- **其他 skill 不干预**: `/socialware-dev`、`/socialware-app-dev`、`/socialware-app-install`、`/room` 不删除此文件，避免干扰正在运行的 session
 
 ## Artifacts
 

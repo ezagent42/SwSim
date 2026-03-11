@@ -2,7 +2,7 @@
 
 > **测试目标**：验证同一 Room 中 3 个 Socialware App 共存——多 namespace 独立运行 + 跨 namespace 引用
 > **前置依赖**：TC-003（掌握 App 安装流程）
-> **测试 Skill**：`/socialware-app-dev` + `/socialware-app`
+> **测试 Skill**：`/socialware-app-dev` + `/socialware-app-install` + `/socialware-app`
 > **覆盖 Spec**：001, 003, 005
 
 ---
@@ -11,42 +11,44 @@
 
 ### Step 1: 创建 Room 和成员
 
-- **操作**：`/room create alpha`（@alice 创建），`/room join alpha @bob`
+- **操作**：`/room create alpha`（alice 创建），`/room join alpha bob:Bob@local`
 - **前置依赖**：无
 - **验证**：Room 和成员就绪
 - **验收标准**：
   - `workspace/rooms/alpha/` 目录结构完整
-  - `config.json` 中 @alice=owner, @bob=member
+  - `config.json` 中 alice:Alice@local=owner, bob:Bob@local=member
 
-### Step 2: 安装第一个 App (ta)
+### Step 2: 开发并安装第一个 App (ta)
 
-- **操作**：`/socialware-app-dev`，模板=two-role-submit-approve，Room=alpha，namespace=ta
-- **前置依赖**：Step 1，模板 `two-role-submit-approve.socialware.md` 存在
-- **验证**：ta.app.md 安装成功
+- **操作**：`/socialware-app-dev`（模板=two-role-submit-approve，App-ID=`task-arena.alice.two-role-submit-approve`）→ `/socialware-app-install`（Room=alpha，namespace=ta，角色绑定）
+- **前置依赖**：Step 1，模板 `two-role-submit-approve.socialware.md` 存在（位于 `simulation/socialware/`）
+- **验证**：App 开发并安装成功，已注册到 `simulation/app-store/registry.json`
 - **验收标准**：
-  - `contracts/ta.app.md` 存在
-  - `config.json` 的 `socialware.installed` 包含 `"ta"`
-  - `socialware.roles` 中 @alice 包含 ta 角色，@bob 包含 ta 角色
+  - `app-store/task-arena.alice.two-role-submit-approve.app.md` 存在（已开发，文件名 = `{AppName}.{DeveloperName}.{SocialwareName}.app.md`）
+  - `simulation/app-store/registry.json` 中已注册该 App
+  - `socialware-app/task-arena.alice.two-role-submit-approve.app.md` 存在（已安装）
+  - `config.json` 的 `socialware-app.installed` 包含 `{"app_id": "task-arena.alice.two-role-submit-approve", "namespace": "ta", "contract": "task-arena.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}`
+  - `socialware-app.roles` 中 alice 包含 ta 角色，bob 包含 ta 角色
 
-### Step 3: 安装第二个 App (ew)
+### Step 3: 开发并安装第二个 App (ew)
 
-- **操作**：`/socialware-app-dev`，模板=event-weaver（假设已有），Room=alpha，namespace=ew
-- **前置依赖**：Step 1，模板存在
-- **验证**：ew.app.md 安装成功
+- **操作**：`/socialware-app-dev`（模板=event-weaver，App-ID=`evt-weave.alice.event-weaver`）→ `/socialware-app-install`（从 registry.json 查询选择 App，Room=alpha，namespace=ew，角色绑定）
+- **前置依赖**：Step 1，模板存在（位于 `simulation/socialware/`）
+- **验证**：App 安装成功，已注册到 registry
 - **验收标准**：
-  - `contracts/ew.app.md` 存在
-  - `socialware.installed` 变为 `["ta", "ew"]`
-  - `socialware.roles` 中角色列表**累加**（不覆盖 ta 的角色）
+  - `socialware-app/evt-weave.alice.event-weaver.app.md` 存在
+  - `socialware-app.installed` 变为 `[{"app_id": "task-arena.alice.two-role-submit-approve", "namespace": "ta", "contract": "task-arena.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}, {"app_id": "evt-weave.alice.event-weaver", "namespace": "ew", "contract": "evt-weave.alice.event-weaver.app.md", "template": "event-weaver.socialware.md"}]`
+  - `socialware-app.roles` 中角色列表**累加**（不覆盖 ta 的角色）
 
-### Step 4: 安装第三个 App (rp)
+### Step 4: 开发并安装第三个 App (rp)
 
-- **操作**：`/socialware-app-dev`，模板=resource-pool（假设已有），Room=alpha，namespace=rp
-- **前置依赖**：Step 1，模板存在
-- **验证**：rp.app.md 安装成功
+- **操作**：`/socialware-app-dev`（模板=resource-pool，App-ID=`res-pool.alice.resource-pool`）→ `/socialware-app-install`（从 registry.json 查询选择 App，Room=alpha，namespace=rp，角色绑定）
+- **前置依赖**：Step 1，模板存在（位于 `simulation/socialware/`）
+- **验证**：App 安装成功，已注册到 registry
 - **验收标准**：
-  - `contracts/rp.app.md` 存在
-  - `socialware.installed` 变为 `["ta", "ew", "rp"]`
-  - `socialware.roles` 中角色列表再次**累加**
+  - `socialware-app/res-pool.alice.resource-pool.app.md` 存在
+  - `socialware-app.installed` 变为 `[{"app_id": "task-arena.alice.two-role-submit-approve", "namespace": "ta", "contract": "task-arena.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}, {"app_id": "evt-weave.alice.event-weaver", "namespace": "ew", "contract": "evt-weave.alice.event-weaver.app.md", "template": "event-weaver.socialware.md"}, {"app_id": "res-pool.alice.resource-pool", "namespace": "rp", "contract": "res-pool.alice.resource-pool.app.md", "template": "resource-pool.socialware.md"}]`
+  - `socialware-app.roles` 中角色列表再次**累加**
 
 ### Step 5: 验证 config.json 多 namespace 状态
 
@@ -54,14 +56,13 @@
 - **前置依赖**：Step 4
 - **验证**：三个 namespace 共存
 - **验收标准**：
-  - `socialware.installed` = `["ta", "ew", "rp"]`
-  - `socialware.roles["@alice:local"]` 包含 ta、ew、rp 前缀的角色
-  - `socialware.roles["@bob:local"]` 包含 ta、ew、rp 前缀的角色
-  - 角色格式为 `{ns}:{role_name}`
+  - `socialware-app.installed` = `[{"app_id": "task-arena.alice.two-role-submit-approve", "namespace": "ta", "contract": "task-arena.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}, {"app_id": "evt-weave.alice.event-weaver", "namespace": "ew", "contract": "evt-weave.alice.event-weaver.app.md", "template": "event-weaver.socialware.md"}, {"app_id": "res-pool.alice.resource-pool", "namespace": "rp", "contract": "res-pool.alice.resource-pool.app.md", "template": "resource-pool.socialware.md"}]`
+  - `socialware-app.roles` 中包含 ta、ew、rp 前缀的 R-ID 键（如 `"ta:R1"`, `"ew:R1"`, `"rp:R1"` 等），值为 `alice:Alice@local` 或 `bob:Bob@local`
+  - 角色格式为 `{ns}:{R-ID}`（如 `"ta:R1": "alice:Alice@local"`）
 
 ### Step 6: 运行 ta namespace 操作
 
-- **操作**：@alice 执行 `ta:submit`
+- **操作**：alice 执行 `ta:submit`
 - **前置依赖**：Step 4
 - **验证**：ta namespace 操作独立
 - **验收标准**：
@@ -71,7 +72,7 @@
 
 ### Step 7: 运行 ew namespace 操作
 
-- **操作**：@alice 执行 `ew:create_branch`（或 ew 对应的 subject action）
+- **操作**：alice 执行 `ew:create_branch`（或 ew 对应的 subject action）
 - **前置依赖**：Step 4
 - **验证**：ew namespace 操作独立
 - **验收标准**：
@@ -112,13 +113,15 @@
   - 如果只有一个 namespace 有 submit，可以自动推断
   - `/status` 分 namespace 展示 flow instances
 
-### Step 11: 同一模板不同 Namespace
+### Step 11: 同一模板不同 App-ID 和 Namespace
 
-- **操作**：再次用 `two-role-submit-approve.socialware.md` 安装到 alpha Room，namespace=ta2
+- **操作**：`/socialware-app-dev`（模板=two-role-submit-approve，App-ID=`task-arena-v2.bob.two-role-submit-approve`，开发者=bob）→ `/socialware-app-install`（从 registry.json 查询选择 App，Room=alpha，namespace=ta2，角色绑定）
 - **前置依赖**：Step 2
-- **验证**：同一模板可以多次安装
+- **验证**：同一模板可以用不同 AppName/DeveloperName 多次开发（生成不同 app-id），并以不同 namespace 安装；App 注册到 registry
 - **验收标准**：
-  - `contracts/ta2.app.md` 存在
-  - `socialware.installed` 包含 `"ta"` 和 `"ta2"`
+  - `app-store/task-arena-v2.bob.two-role-submit-approve.app.md` 存在（已开发，文件名 = `{AppName}.{DeveloperName}.{SocialwareName}.app.md`）
+  - `simulation/app-store/registry.json` 中同时包含 `task-arena.alice.two-role-submit-approve` 和 `task-arena-v2.bob.two-role-submit-approve` 两个条目
+  - `socialware-app/task-arena-v2.bob.two-role-submit-approve.app.md` 存在（已安装）
+  - `socialware-app.installed` 包含 `{"app_id": "task-arena.alice.two-role-submit-approve", ...}` 和 `{"app_id": "task-arena-v2.bob.two-role-submit-approve", "namespace": "ta2", "contract": "task-arena-v2.bob.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}`
   - ta 和 ta2 的 flow instances 完全独立
-  - 角色绑定可以不同（ta2 的审批者可以是 @alice，而 ta 的审批者是 @bob）
+  - 角色绑定可以不同（ta2 的审批者可以是 alice，而 ta 的审批者是 bob）
