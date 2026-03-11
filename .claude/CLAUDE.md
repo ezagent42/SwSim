@@ -83,7 +83,7 @@ socialware/           app-store/                rooms/{room}/socialware-app/ run
 
 - **Multi-session mode**: Each Claude Code session = one peer identity, sharing workspace files
 - **Single-session mode**: Use `/switch {entity}:{nickname}@local` for identity switching (fallback)
-- **Inbox hook**: `UserPromptSubmit` hook checks `.active-session.json` for new messages
+- **Inbox hook**: `UserPromptSubmit` hook scans `rooms/{room}/.session.{username}.json`（per-room per-identity，支持多 peer 同时运行）
 - **tmux watcher**: Each peer gets a watcher pane for passive notification
 - Shared filesystem = P2P network (Zenoh simulation)
 

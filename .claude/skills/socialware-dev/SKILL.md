@@ -7,8 +7,7 @@ description: "Design a new Socialware organization — generates contract templa
 
 ## 启动前置
 
-1. 如果存在 `simulation/workspace/.active-session.json`，删除它（退出 runtime 模式）。
-2. **身份确认**: 扫描 `simulation/workspace/identities/*.json`，列出可用身份。
+1. **身份确认**: 扫描 `simulation/workspace/identities/*.json`，列出可用身份。
    - 如果无身份 → 提示用户先用 `/room create` 或手动创建身份文件。
    - 如果有身份 → 让用户选择以哪个身份操作（即模板的 `开发者`）。
 

@@ -7,8 +7,6 @@ description: "Create, list, and manage Rooms — collaboration spaces that host 
 
 ## 启动前置
 
-如果存在 `simulation/workspace/.active-session.json`，删除它（退出 runtime 模式）。
-
 ## 你在管理什么
 
 **Room 是协作空间**——一个可以安装多个 Socialware 的持久化环境。

@@ -1,36 +1,38 @@
 #!/bin/bash
 # check-inbox.sh — UserPromptSubmit hook for socialware-app runtime
 # Checks for new timeline messages since last peer_cursor
-# Only active when .active-session.json exists
+# Scans rooms/{room}/.session.{username}.json (per-room per-identity)
 
-SESSION_FILE="simulation/workspace/.active-session.json"
+WORKSPACE="simulation/workspace"
 
-# Guard: only run during active socialware-app session
-[ ! -f "$SESSION_FILE" ] && exit 0
+# Guard: find any active session files
+SESSION_FILES=$(find "$WORKSPACE/rooms" -name '.session.*.json' 2>/dev/null)
+[ -z "$SESSION_FILES" ] && exit 0
 
-# Read session info
-ROOM=$(python3 -c "import json; print(json.load(open('$SESSION_FILE'))['room'])" 2>/dev/null)
-IDENTITY=$(python3 -c "import json; print(json.load(open('$SESSION_FILE'))['identity'])" 2>/dev/null)
+# Process each active session
+for SESSION_FILE in $SESSION_FILES; do
+    ROOM=$(python3 -c "import json; print(json.load(open('$SESSION_FILE'))['room'])" 2>/dev/null)
+    IDENTITY=$(python3 -c "import json; print(json.load(open('$SESSION_FILE'))['identity'])" 2>/dev/null)
 
-[ -z "$ROOM" ] || [ -z "$IDENTITY" ] && exit 0
+    [ -z "$ROOM" ] || [ -z "$IDENTITY" ] && continue
 
-STATE_FILE="simulation/workspace/rooms/$ROOM/state.json"
-[ ! -f "$STATE_FILE" ] && exit 0
+    STATE_FILE="$WORKSPACE/rooms/$ROOM/state.json"
+    [ ! -f "$STATE_FILE" ] && continue
 
-# Get peer cursor
-CURSOR=$(python3 -c "
+    # Get peer cursor
+    CURSOR=$(python3 -c "
 import json
 state = json.load(open('$STATE_FILE'))
 print(state.get('peer_cursors', {}).get('$IDENTITY', 0))
 " 2>/dev/null)
-[ -z "$CURSOR" ] && CURSOR=0
+    [ -z "$CURSOR" ] && CURSOR=0
 
-# Find timeline shards
-TIMELINE_DIR="simulation/workspace/rooms/$ROOM/timeline"
-[ ! -d "$TIMELINE_DIR" ] && exit 0
+    # Find timeline shards
+    TIMELINE_DIR="$WORKSPACE/rooms/$ROOM/timeline"
+    [ ! -d "$TIMELINE_DIR" ] && continue
 
-# Count new messages (clock > cursor)
-NEW_MSGS=$(python3 -c "
+    # Count new messages (clock > cursor, exclude self)
+    NEW_MSGS=$(python3 -c "
 import json, glob, os
 cursor = $CURSOR
 timeline_dir = '$TIMELINE_DIR'
@@ -53,11 +55,12 @@ for shard in sorted(glob.glob(os.path.join(timeline_dir, '*.jsonl'))):
             except json.JSONDecodeError:
                 continue
 if new_messages:
-    print(f'📬 {len(new_messages)} 条新消息（自 clock={cursor} 以来）:')
+    print(f'📬 Room {\"$ROOM\"}: {len(new_messages)} 条新消息（自 clock={cursor} 以来）:')
     for m in new_messages:
         print(m)
 " 2>/dev/null)
 
-# Output new messages (visible to Claude Code as hook output)
-[ -n "$NEW_MSGS" ] && echo "$NEW_MSGS"
+    [ -n "$NEW_MSGS" ] && echo "$NEW_MSGS"
+done
+
 exit 0

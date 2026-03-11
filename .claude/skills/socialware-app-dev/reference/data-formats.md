@@ -249,9 +249,9 @@ Flow 实例关联规则:
 
 ## Active Session
 
-路径: `workspace/.active-session.json`
+路径: `workspace/rooms/{room}/.session.{username}.json`（per-room per-identity）
 
-Runtime 会话标记，由 `/socialware-app` 启动时创建，退出时删除。用于 `UserPromptSubmit` hook 判断是否检查 inbox。
+Runtime 会话标记，由 `/socialware-app` 启动时创建，`/quit` 退出时删除。`check-inbox.sh` hook 扫描所有 `rooms/*/.session.*.json` 检查 inbox。支持多 peer 同时运行，互不干扰。
 
 ```json
 {

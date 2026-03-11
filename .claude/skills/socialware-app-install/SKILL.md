@@ -7,8 +7,7 @@ description: "Install a developed Socialware App from app-store into a Room — 
 
 ## 启动前置
 
-1. 如果存在 `simulation/workspace/.active-session.json`，删除它（退出 runtime 模式）。
-2. **身份确认**: 扫描 `simulation/workspace/identities/*.json`，列出可用身份。
+1. **身份确认**: 扫描 `simulation/workspace/identities/*.json`，列出可用身份。
    - 如果无身份 → 提示用户先用 `/room create` 创建身份。
    - 如果有身份 → 让用户选择以哪个身份操作（即 App 的 `安装者`）。
    - **该身份必须是目标 Room 的成员**（Phase 1 选择 Room 后验证）。

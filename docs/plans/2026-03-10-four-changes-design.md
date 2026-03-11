@@ -13,9 +13,9 @@ socialware-dev skill §3 引导要求承诺必须具体可衡量：`{动作} + {
 
 ## 变更 3: 强制检查 peer_cursor
 
-- Hook: `UserPromptSubmit` → `check-inbox.sh`（检查 `.active-session.json`）
+- Hook: `UserPromptSubmit` → `check-inbox.sh`（扫描 `rooms/{room}/.session.{username}.json`）
 - tmux watcher pane: `start-p2p.sh` 每 peer 配 watcher 小 pane
-- 互斥清理: `/socialware-app` 创建 session 文件，其他 skill 启动时删除
+- Session 文件 per-room per-identity，多 peer 互不干扰，其他 skill 不再删除 session
 
 ## 变更 4: app-store + socialware-app-install
 

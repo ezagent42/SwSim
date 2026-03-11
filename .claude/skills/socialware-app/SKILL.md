@@ -7,12 +7,11 @@ description: "Run an installed Socialware contract — text-game runtime with pe
 
 ## 启动前置
 
-1. 如果存在 `simulation/workspace/.active-session.json`，删除它（清除旧 session）。
-2. **身份确认**: 扫描 `simulation/workspace/identities/*.json`，列出可用身份。
+1. **身份确认**: 扫描 `simulation/workspace/identities/*.json`，列出可用身份。
    - 如果无身份或无 Room → 提示：先用 `/room create` 创建身份和 Room，然后用 `/socialware-dev` 设计模板（`.socialware.md`），再 `/socialware-app-dev` 开发 App，最后 `/socialware-app-install` 安装。
    - 如果有身份 → 让用户选择以哪个身份操作。
    - **该身份必须是目标 Room 的成员**（启动时验证 config.json membership）。
-3. 创建 `simulation/workspace/.active-session.json`（启用 inbox hook）:
+2. 创建 session 文件 `simulation/workspace/rooms/{room}/.session.{username}.json`（per-room per-identity，支持多 peer 同时运行）:
 ```json
 {
   "room": "{room}",
@@ -73,7 +72,7 @@ pane 之间通过共享文件系统通信：Alice 写入 timeline → Bob 的 wa
 3. 确认身份在 Room 成员列表中
 4. 读取所有已安装的 `socialware-app/*.app.md`
 5. 加载 state.json（不存在则从 timeline 重建）
-6. **创建 `.active-session.json`**（启用 UserPromptSubmit hook 的 inbox 检查）
+6. **创建 `.session.{username}.json`**（启用 UserPromptSubmit hook 的 inbox 检查）
 7. 打印启动面板:
 
 ```
@@ -127,7 +126,7 @@ pane 之间通过共享文件系统通信：Alice 写入 timeline → Bob 的 wa
 | `/history` | 消息历史 |
 | `/timeline` | 原始 timeline JSONL |
 | `/rebuild` | 从 timeline 重建 state.json |
-| `/quit` | 退出（持久化 peer_cursor，删除 .active-session.json） |
+| `/quit` | 退出（持久化 peer_cursor，删除 .session.{username}.json） |
 
 ## /switch — 单会话 P2P 模拟（Fallback）
 
@@ -135,14 +134,14 @@ pane 之间通过共享文件系统通信：Alice 写入 timeline → Bob 的 wa
 2. Filter timeline: clock > cursor → inbox
 3. 打印收件箱
 4. 更新 cursor，切换 author
-5. 更新 `.active-session.json` 中的 identity
+5. 更新 `.session.{username}.json` 中的 identity
 
 > 多会话模式下不需要 /switch。每个 Claude Code 会话以不同身份启动即可。
 
 ## /quit — 退出
 
 1. 持久化当前 peer_cursor 到 state.json
-2. **删除 `simulation/workspace/.active-session.json`**（停用 inbox hook）
+2. **删除 `simulation/workspace/rooms/{room}/.session.{username}.json`**（停用 inbox hook）
 3. 打印退出信息
 
 ## /rebuild — CRDT 验证
@@ -183,5 +182,5 @@ Claude Code 会话是用户驱动的（同步），实际并发概率极低。
 - **模拟不是假装**: bash 真执行，只有 P2P 是模拟的
 - **多会话优先**: 每个 peer 一个 Claude Code 会话，共享文件系统
 - **消息通知**: watch-timeline.sh 实时监听，/inbox 主动查询
-- **session 生命周期**: 启动创建 `.active-session.json`，退出删除
+- **session 生命周期**: 启动创建 `rooms/{room}/.session.{username}.json`，退出删除。per-room per-identity，支持多 peer 同时运行
 - **身份格式**: `{username}:{nickname}@{namespace}`（如 `alice:Alice@local`），无 `@` 前缀
