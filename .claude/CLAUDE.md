@@ -20,8 +20,8 @@ SwSim is a Socialware contract-file model simulation. It simulates the full life
 - `docs/` — Specs and plans
 - `docs/spec/` — Seven spec documents
 - `docs/testcase/` — Thirteen test cases
-- `simulation/contracts/` — Socialware templates (`.socialware.md`, read-only)
-- `simulation/workspace/app-store/` — Developed Apps (`.app.md`, tools bound, users unbound)
+- `simulation/socialware/` — Socialware templates (`.socialware.md`, read-only)
+- `simulation/workspace/app-store/` — Developed Apps (`.app.md`, tools bound, users unbound) + `registry.json`
 - `simulation/workspace/identities/` — Global identity files
 - `simulation/workspace/rooms/` — Rooms with installed Apps
 - `.claude/skills/` — Five Skills (socialware-dev, socialware-app-dev, socialware-app-install, socialware-app, room)
@@ -34,8 +34,9 @@ room  →  socialware-dev  →  socialware-app-dev  →  socialware-app-install 
 创建空间    模板设计            App 开发                App 安装到 Room            运行时
 创建身份    需要身份(开发者)     需要身份(开发者)         需要身份(安装者)+Room成员   需要身份+Room成员
 
-contracts/            app-store/                rooms/{room}/contracts/     runtime
+socialware/           app-store/                rooms/{room}/contracts/     runtime
 {name}.socialware.md  {app-id}.app.md           {app-id}.app.md            timeline+state
+                      + registry.json
 
 开发者: {identity}    开发者: {identity}         安装者: {identity}
 §1 = _待绑定_          §1 = _待绑定_              §1 = 已填持有者
@@ -46,7 +47,10 @@ contracts/            app-store/                rooms/{room}/contracts/     runt
 ## Naming Convention
 
 - Templates: `{descriptive-name}.socialware.md` (e.g., `two-role-submit-approve.socialware.md`)
-- App-ID: descriptive name (e.g., `doc-review-workflow`)
+- App-ID: `{AppName}.{DeveloperName}.{SocialwareName}` format (e.g., `doc-review.alice.two-role-submit-approve`)
+  - AppName: developer-chosen descriptive name
+  - DeveloperName: identity username of the developer
+  - SocialwareName: name of the source template (without `.socialware.md`)
 - Namespace: 2-4 letter abbreviation, chosen at install time (e.g., `dc`, `ta`)
 - Names are decoupled — template name ≠ app-id ≠ namespace
 
@@ -58,8 +62,8 @@ contracts/            app-store/                rooms/{room}/contracts/     runt
 
 ## Development Rules
 
-1. Template files in `simulation/contracts/` are **READ-ONLY** after creation
-2. App Dev copies template to `workspace/app-store/{app-id}.app.md` and fills §5 tools
+1. Template files in `simulation/socialware/` are **READ-ONLY** after creation
+2. App Dev copies template to `workspace/app-store/{app-id}.app.md`, fills §5 tools, and registers in `app-store/registry.json`
 3. App Install copies from app-store to `workspace/rooms/{room}/contracts/` and fills §1 holders
 4. Timeline is **append-only** — never edit or delete entries
 5. State is always rebuildable from Timeline (`/rebuild`)

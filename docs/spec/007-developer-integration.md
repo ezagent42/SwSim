@@ -29,7 +29,7 @@
 创建/加入 Room (/room)
     │
     ▼
-开发 App (/socialware-app-dev)：为每个 Action 选择工具 → 生成 .app.md 到 app-store
+开发 App (/socialware-app-dev)：为每个 Action 选择工具 → 生成 .app.md 到 app-store + 注册到 registry.json
     │
     ▼
 安装 App (/socialware-app-install)：绑定 Identity 到 Role → 安装到 Room
@@ -135,10 +135,10 @@ Phase 3: 所有操作自动化 → 生产就绪
 ```
 
 Skill 引导你完成：
-1. 选择模板（从 `simulation/contracts/` 中选）
+1. 选择模板（从 `simulation/socialware/` 中选）
 2. 选择 namespace（如 `ew`）
 3. **逐个 Action 绑定工具**（这是核心步骤）
-4. 生成 `.app.md` 到 `workspace/app-store/`（状态：已开发）
+4. 生成 `.app.md` 到 `workspace/app-store/`（状态：已开发），并在 `simulation/app-store/registry.json` 中创建注册条目
 
 ### 5.2b 安装 App 到 Room
 
@@ -147,10 +147,10 @@ Skill 引导你完成：
 ```
 
 Skill 引导你完成：
-1. 选择已开发 App（从 `workspace/app-store/` 中选）
+1. 选择已开发 App（通过 `simulation/app-store/registry.json` 查询，从 `workspace/app-store/` 中选）
 2. 选择目标 Room
 3. 绑定 Role → Identity（你是谁，队友是谁）
-4. 安装到 Room（生成 `rooms/{room}/contracts/{app-id}.app.md`，状态：已安装）
+4. 安装到 Room（生成 `rooms/{room}/contracts/{AppName}.{DeveloperName}.{SocialwareName}.app.md`，状态：已安装）
 
 ### 5.3 绑定示例
 
@@ -258,10 +258,10 @@ ew:merge.execute 绑定:                ew:merge.execute 绑定:
 
 ```
 alice:Alice@local 的 workspace:
-  rooms/my-project/contracts/ew.app.md  → §5 绑定 bash/api
+  rooms/my-project/contracts/ew.alice.event-weaver.app.md  → §5 绑定 bash/api
 
 bob:Bob@local 的 workspace:
-  rooms/my-project/contracts/ew.app.md  → §5 绑定 manual
+  rooms/my-project/contracts/ew.alice.event-weaver.app.md  → §5 绑定 manual
 ```
 
 在 SwSim 模拟环境（共享文件系统）中，两个 peer 使用同一份 `.app.md`——此时以 §5 中更通用的绑定（通常是 `manual`）为准，或者在 §5 中标注 peer-specific 绑定。

@@ -19,7 +19,7 @@
 | 属性 | 值 |
 |------|-----|
 | 文件扩展名 | `.socialware.md` |
-| 存储位置 | `simulation/contracts/` |
+| 存储位置 | `simulation/socialware/` |
 | Status 字段 | 始终为 `模板` |
 | 性质 | 只读，创建后不修改 |
 

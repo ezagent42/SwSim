@@ -32,8 +32,41 @@ simulation/workspace/
 
 已开发但尚未安装的 Socialware App。§5 工具已填，§1 持有者为 `_待绑定_`。
 
+- App-ID 格式: `{AppName}.{DeveloperName}.{SocialwareName}`（如 `doc-review.alice.two-role-submit-approve`）
 - 由 `/socialware-app-dev` 生成
 - 由 `/socialware-app-install` 读取并安装到 Room
+
+## App Registry
+
+路径: `simulation/app-store/registry.json`（注意: 不在 `workspace/` 下）
+
+记录所有已开发 App 的注册信息。由 `/socialware-app-dev` 在创建 App 后通过 `register-app.py` 脚本写入。`/socialware-app-install` 读取此文件列出可安装的 App。
+
+```json
+{
+  "version": 1,
+  "apps": {
+    "doc-review.alice.two-role-submit-approve": {
+      "app_id": "doc-review.alice.two-role-submit-approve",
+      "socialware": "two-role-submit-approve",
+      "developer": "alice:Alice@local",
+      "created_at": "2026-03-11T10:00:00Z",
+      "app_file": "doc-review.alice.two-role-submit-approve.app.md",
+      "description": "文档审批工作流"
+    }
+  }
+}
+```
+
+字段说明:
+- `version`: 注册表版本号
+- `apps`: app-id → App 信息的映射
+  - `app_id`: `{AppName}.{DeveloperName}.{SocialwareName}` 格式
+  - `socialware`: 模板名（不含 `.socialware.md` 扩展名）
+  - `developer`: 开发者身份（`{username}:{nickname}@{namespace}` 格式）
+  - `created_at`: ISO8601 创建时间
+  - `app_file`: App 文件名（在 `workspace/app-store/` 中）
+  - `description`: 简要描述
 
 ## Room Config
 
@@ -57,15 +90,15 @@ simulation/workspace/
   "socialware": {
     "installed": [
       {
-        "app_id": "engineering-workflow",
+        "app_id": "eng-flow.alice.engineering-workflow",
         "namespace": "ew",
-        "contract": "engineering-workflow.app.md",
+        "contract": "eng-flow.alice.engineering-workflow.app.md",
         "template": "engineering-workflow.socialware.md"
       },
       {
-        "app_id": "task-assignment",
+        "app_id": "task-mgmt.alice.task-assignment",
         "namespace": "ta",
-        "contract": "task-assignment.app.md",
+        "contract": "task-mgmt.alice.task-assignment.app.md",
         "template": "task-assignment.socialware.md"
       }
     ],

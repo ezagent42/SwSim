@@ -49,7 +49,7 @@
   - `state.json` 存在且 JSON 有效
   - `timeline/shard-001.jsonl` 存在且行数不变
   - `config.json` 存在且未修改
-  - `contracts/da.app.md` 存在
+  - `contracts/doc-audit.alice.two-role-submit-approve.app.md` 存在
   - `content/` 下的 Content Object 文件都在
 
 ### Step 5: 重新启动 Session
@@ -87,18 +87,18 @@
 
 ### Step 8: 修改契约后热重启
 
-- **操作**：关闭 session → 编辑 `contracts/da.app.md`（如修改某个 Tool 绑定）→ 重启
+- **操作**：关闭 session → 编辑 `contracts/doc-audit.alice.two-role-submit-approve.app.md`（如修改某个 Tool 绑定）→ 重启
 - **前置依赖**：Step 1
 - **验证**：新契约生效
 - **验收标准**：
-  - 重启后读取的是修改后的 `da.app.md`
+  - 重启后读取的是修改后的 `doc-audit.alice.two-role-submit-approve.app.md`
   - 新的 Tool 绑定在后续操作中生效
   - 已有 Timeline entries 不受影响（它们已固化）
   - 新操作使用新绑定
 
 ### Step 9: 修改 Flow 后的兼容性
 
-- **操作**：关闭 session → 在 da.app.md 中增加一个新状态（如 `needs_info`）→ 重启
+- **操作**：关闭 session → 在 doc-audit.alice.two-role-submit-approve.app.md 中增加一个新状态（如 `needs_info`）→ 重启
 - **前置依赖**：Step 1
 - **验证**：向后兼容的修改可以正常工作
 - **验收标准**：

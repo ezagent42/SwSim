@@ -23,9 +23,9 @@
 | Tool | `_待实现_` | 绑定为 `bash: ...` 等 | 绑定为 `bash: ...` 等 |
 | 引用 | `_待实现_` 或 `_无_` | 具体路径或 `_无_` | 具体路径或 `_无_` |
 | Status | `模板` | `已开发` | `已安装` |
-| 存储 | `simulation/contracts/` | `workspace/app-store/` | `workspace/rooms/{room}/contracts/` |
+| 存储 | `simulation/socialware/` | `workspace/app-store/` | `workspace/rooms/{room}/contracts/` |
 
-**创建流程**：App Dev 复制模板 → 填充所有 §5 `_待实现_` → 保存为 `.app.md`（已开发）到 app-store。App Install 从 app-store 复制 → 填充 §1 `_待绑定_` → 安装到 Room。模板保持只读。
+**创建流程**：App Dev 复制模板 → 填充所有 §5 `_待实现_` → 保存为 `.app.md`（已开发）到 app-store，并在 `simulation/app-store/registry.json` 中创建注册条目。App Install 从 app-store（通过 registry.json 查询）复制 → 填充 §1 `_待绑定_` → 安装到 Room。模板保持只读。
 
 ---
 
@@ -36,12 +36,17 @@
 | 层级 | 命名 | 示例 |
 |------|------|------|
 | 模板 | `{descriptive-name}.socialware.md` | `two-role-submit-approve.socialware.md` |
-| App（app-store） | `{app-id}.app.md` | `doc-review-workflow.app.md` |
-| App（已安装） | `{app-id}.app.md`（复制到 Room） | `doc-review-workflow.app.md` |
+| App（app-store） | `{AppName}.{DeveloperName}.{SocialwareName}.app.md` | `doc-review.alice.two-role-submit-approve.app.md` |
+| App（已安装） | `{AppName}.{DeveloperName}.{SocialwareName}.app.md`（复制到 Room） | `doc-review.alice.two-role-submit-approve.app.md` |
 | Namespace | 2-4 字母简称，install 时选择 | `da`, `ta`, `ew` |
 
+**App-ID 格式**：`{AppName}.{DeveloperName}.{SocialwareName}`
+- **AppName**：开发者为其实现选择的名称（如 `doc-review`）
+- **DeveloperName**：开发者 Identity 的 username 部分（如 `alice` from `alice:Alice@local`）
+- **SocialwareName**：模板文件名去掉 `.socialware.md` 扩展名（如 `two-role-submit-approve`）
+
 - 模板名描述组织设计（what it is）
-- App-ID 是描述性名称（what app it becomes）
+- App-ID 结合了实现名、开发者、来源模板（who made what from which template）
 - Namespace 是 Room 内的短缩写（how it's called in this Room）
 - 同一个模板可以被不同 App Dev 开发成不同 App，同一 App 可安装到多个 Room
 
@@ -51,25 +56,25 @@
 
 ### 4.1 Header
 
-**已开发阶段**（`app-store/{app-id}.app.md`）:
+**已开发阶段**（`app-store/{AppName}.{DeveloperName}.{SocialwareName}.app.md`）:
 
 ```markdown
-# {app-id}.app.md
+# {AppName}.{DeveloperName}.{SocialwareName}.app.md
 
 > 状态: 已开发
-> App-ID: {app-id}
-> 基于模板: {template_name}.socialware.md
+> App-ID: {AppName}.{DeveloperName}.{SocialwareName}
+> 基于模板: {SocialwareName}.socialware.md
 > 开发者: {username}:{nickname}@{namespace}
 ```
 
-**已安装阶段**（`rooms/{room}/contracts/{app-id}.app.md`）:
+**已安装阶段**（`rooms/{room}/contracts/{AppName}.{DeveloperName}.{SocialwareName}.app.md`）:
 
 ```markdown
-# {app-id}.app.md
+# {AppName}.{DeveloperName}.{SocialwareName}.app.md
 
 > 状态: 已安装
-> App-ID: {app-id}
-> 基于模板: {template_name}.socialware.md
+> App-ID: {AppName}.{DeveloperName}.{SocialwareName}
+> 基于模板: {SocialwareName}.socialware.md
 > 开发者: {username}:{nickname}@{namespace}
 > 安装者: {username}:{nickname}@{namespace}
 > Namespace: {ns}
@@ -169,9 +174,9 @@ App 文件新增的章节，定义运行时环境：
 ```
 Room "alpha"
 ├── contracts/
-│   ├── task-arena.app.md       (namespace: ta)
-│   ├── edit-workflow.app.md    (namespace: ew)
-│   └── resource-pool.app.md   (namespace: rp)
+│   ├── task-arena.alice.two-role-submit-approve.app.md   (namespace: ta)
+│   ├── edit-workflow.alice.event-weaver.app.md           (namespace: ew)
+│   └── resource-pool.bob.resource-pool.app.md            (namespace: rp)
 ├── config.json      (注册所有 namespace)
 ├── state.json       (合并所有 namespace 的 flow_states)
 └── timeline/        (共享 timeline)
@@ -201,21 +206,21 @@ Room "alpha"
   "socialware": {
     "installed": [
       {
-        "app_id": "task-arena",
+        "app_id": "task-arena.alice.two-role-submit-approve",
         "namespace": "ta",
-        "contract": "task-arena.app.md",
+        "contract": "task-arena.alice.two-role-submit-approve.app.md",
         "template": "two-role-submit-approve.socialware.md"
       },
       {
-        "app_id": "edit-workflow",
+        "app_id": "edit-workflow.alice.branch-merge",
         "namespace": "ew",
-        "contract": "edit-workflow.app.md",
+        "contract": "edit-workflow.alice.branch-merge.app.md",
         "template": "branch-merge.socialware.md"
       },
       {
-        "app_id": "resource-pool",
+        "app_id": "resource-pool.bob.resource-allocation",
         "namespace": "rp",
-        "contract": "resource-pool.app.md",
+        "contract": "resource-pool.bob.resource-allocation.app.md",
         "template": "resource-allocation.socialware.md"
       }
     ],
@@ -397,13 +402,13 @@ workspace/rooms/{name}/artifacts/
 
 ## 8. 完整示例
 
-### 8.1 task-arena.app.md
+### 8.1 task-arena.alice.two-role-submit-approve.app.md
 
 ```markdown
-# task-arena.app.md
+# task-arena.alice.two-role-submit-approve.app.md
 
 > 状态: 已安装
-> App-ID: task-arena
+> App-ID: task-arena.alice.two-role-submit-approve
 > 基于模板: two-role-submit-approve.socialware.md
 > 开发者: alice:Alice@local
 > 安装者: alice:Alice@local
@@ -514,9 +519,9 @@ workspace/rooms/{name}/artifacts/
   "socialware": {
     "installed": [
       {
-        "app_id": "task-arena",
+        "app_id": "task-arena.alice.two-role-submit-approve",
         "namespace": "ta",
-        "contract": "task-arena.app.md",
+        "contract": "task-arena.alice.two-role-submit-approve.app.md",
         "template": "two-role-submit-approve.socialware.md"
       }
     ],

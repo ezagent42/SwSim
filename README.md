@@ -43,7 +43,8 @@ Template (.socialware.md) + Identity bindings + Tool bindings = Runnable App (.a
 
 - 输入：模板
 - 输出：`app-store/{app-id}.app.md`（已开发，§5 已填工具，§1 仍为 `_待绑定_`）
-- 工作内容：复制模板到 app-store，为每个 Action 绑定工具
+- App-ID 格式：`{AppName}.{DeveloperName}.{SocialwareName}`（如 `doc-review.alice.two-role-submit-approve`）
+- 工作内容：复制模板到 app-store，为每个 Action 绑定工具，注册到 `app-store/registry.json`
 
 ### 4. `/socialware-app-install` — 安装 App 到 Room（绑用户）
 
@@ -94,10 +95,11 @@ SwSim/
 │       ├── 006-p2p-simulation.md
 │       └── 007-developer-integration.md
 ├── simulation/
-│   ├── contracts/         # Socialware templates (.socialware.md, read-only)
+│   ├── socialware/        # Socialware templates (.socialware.md, read-only)
 │   └── workspace/
 │       ├── identities/    # Global identities
 │       ├── app-store/     # Developed apps (.app.md, awaiting install)
+│       │   └── registry.json  # App registry (app-dev registers, app-install queries)
 │       └── rooms/
 │           └── {room_name}/
 │               ├── identities/   # Room members
@@ -118,7 +120,7 @@ SwSim/
 /socialware-dev
 ```
 
-描述你的组织需求，Skill 会引导你定义 Role、Flow、Commitment、Arena，输出 `.socialware.md` 模板文件到 `simulation/contracts/`。
+描述你的组织需求，Skill 会引导你定义 Role、Flow、Commitment、Arena，输出 `.socialware.md` 模板文件到 `simulation/socialware/`。
 
 ### 第二步：创建 Room
 

@@ -73,9 +73,9 @@
 
 - **操作**：命名模板为 `two-role-submit-approve`，确认预览
 - **前置依赖**：Step 6
-- **验证**：文件写入 `simulation/contracts/two-role-submit-approve.socialware.md`
+- **验证**：文件写入 `simulation/socialware/two-role-submit-approve.socialware.md`
 - **验收标准**：
-  - 文件路径正确：`simulation/contracts/two-role-submit-approve.socialware.md`
+  - 文件路径正确：`simulation/socialware/two-role-submit-approve.socialware.md`
   - 扩展名为 `.socialware.md`（不是 `.contract.md` 或 `.app.md`）
   - Header 中状态为「模板」
   - 文件内容包含 §1-§5 全部章节
@@ -84,7 +84,7 @@
 
 ### Step 8: 模板只读验证
 
-- **操作**：尝试通过 `/socialware-app-dev` 或 `/socialware-app-install` 读取刚创建的模板
+- **操作**：尝试通过 `/socialware-app-dev` 或 `/socialware-app-install` 读取刚创建的模板（模板位于 `simulation/socialware/`）
 - **前置依赖**：Step 7
 - **验证**：模板能被正确列出和读取
 - **验收标准**：模板出现在可用模板列表中，内容与创建时完全一致

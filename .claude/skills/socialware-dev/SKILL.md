@@ -26,7 +26,7 @@ Socialware 是一份 `.socialware.md` 文件，用四个原语描述组织图：
 
 ## 制品
 
-- **产出**: `simulation/contracts/{name}.socialware.md`（状态: 模板，开发者: 当前身份）
+- **产出**: `simulation/socialware/{name}.socialware.md`（状态: 模板，开发者: 当前身份）
 - 文件扩展名: `.socialware.md`
 - 命名: 用户自选描述性名称（如 `two-role-submit-approve.socialware.md`）
 - 这份文件是 **Socialware 产品**——可分发给不同的 App Dev 各自绑定
@@ -91,7 +91,7 @@ Socialware 是一份 `.socialware.md` 文件，用四个原语描述组织图：
 
 模板设计完成后，提示用户下一步：
 
-> 模板已保存到 `simulation/contracts/`。下一步用 `/socialware-app-dev` 基于此模板开发 App（填入工具绑定）。
+> 模板已保存到 `simulation/socialware/`。下一步用 `/socialware-app-dev` 基于此模板开发 App（填入工具绑定）。
 
 **完整流程参考**: `/room` → `/socialware-dev` → `/socialware-app-dev` → `/socialware-app-install` → `/socialware-app`
 

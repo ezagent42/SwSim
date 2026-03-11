@@ -12,7 +12,7 @@
 ### Step 1: 启动 App Runtime
 
 - **操作**：执行 `/socialware-app`，选择 Room=doc-review，Identity=alice:Alice@local
-- **前置依赖**：TC-003 已完成（da.app.md 已安装）
+- **前置依赖**：TC-003 已完成（doc-audit.alice.two-role-submit-approve.app.md 已安装）
 - **验证**：启动面板正确显示
 - **验收标准**：
   - 显示 Room 名称：doc-review

@@ -43,18 +43,19 @@ simulation/workspace/app-store/           simulation/workspace/rooms/{room}/
 
 ### Phase 1: 选择 App 和 Room
 
-1. 列出 app-store 中可用的 App（`simulation/workspace/app-store/*.app.md`），展示摘要
-2. 让用户选择要安装的 App
-3. 列出可用 Room（`simulation/workspace/rooms/`），让用户选择目标 Room
-4. 让用户选择 namespace（2-4 字母简称，如 `dc`, `ta`, `ew`）
-5. 检查 namespace 在该 Room 中是否已被占用
+1. 读取 `simulation/app-store/registry.json`，列出已注册的 App，展示摘要（app_id, socialware, developer, description）
+2. 让用户选择要安装的 App（通过 app_id）
+3. 根据选中的 registry 条目，定位 App 文件: `simulation/workspace/app-store/{registry.apps[app_id].app_file}`
+4. 列出可用 Room（`simulation/workspace/rooms/`），让用户选择目标 Room
+5. 让用户选择 namespace（2-4 字母简称，如 `dc`, `ta`, `ew`）
+6. 检查 namespace 在该 Room 中是否已被占用
 
 ### Phase 2: 绑定角色（§1 持有者）
 
-6. 列出 Room 的现有成员（从 config.json 读取）
-7. 展示 App 的角色表（从 app-store 中的 App 读取）
-8. 逐个角色问持有者（必须是 Room 成员，或新加入）
-9. 如需新成员:
+7. 列出 Room 的现有成员（从 config.json 读取）
+8. 展示 App 的角色表（从 app-store 中的 App 读取）
+9. 逐个角色问持有者（必须是 Room 成员，或新加入）
+10. 如需新成员:
    - 创建 `simulation/workspace/identities/{username}@{namespace}.json`
    - 在 `simulation/workspace/rooms/{room}/identities/` 创建引用
    - 更新 config.json 的 `membership.members`
@@ -62,19 +63,19 @@ simulation/workspace/app-store/           simulation/workspace/rooms/{room}/
 
 ### Phase 3: 跨契约 Mock
 
-10. 检查 App 中声明的跨契约引用（依赖/委托/资源）
-11. 同 Room 已安装 → 验证引用原子
-12. 不存在 → 询问最小信息 → 生成 mock 数据到 state.json
+11. 检查 App 中声明的跨契约引用（依赖/委托/资源）
+12. 同 Room 已安装 → 验证引用原子
+13. 不存在 → 询问最小信息 → 生成 mock 数据到 state.json
 
 ### Phase 4: 写入
 
-13. 复制 app-store 中的 App 到 `workspace/rooms/{room}/contracts/{app-id}.app.md`
-14. 在安装副本上修改:
+14. 复制 app-store 中的 App 到 `workspace/rooms/{room}/contracts/{app-id}.app.md`
+15. 在安装副本上修改:
     - 头部状态 → `已安装`
     - 添加 `安装者: {当前身份}`、`Namespace: {ns}`、`Room: {room}`
     - §1 填入持有者（具体 identity）
     - 添加 §6 模拟环境
-15. 更新 config.json:
+16. 更新 config.json:
     - `socialware.installed` 添加:
       ```json
       {
@@ -84,8 +85,9 @@ simulation/workspace/app-store/           simulation/workspace/rooms/{room}/
         "template": "{template_name}.socialware.md"
       }
       ```
+      其中 `app-id` 使用 `{AppName}.{DeveloperName}.{SocialwareName}` 格式
     - `socialware.roles` 添加: `"{ns}:{R-ID}": "{username}:{nickname}@{namespace}"` 对每个角色
-16. 更新 state.json:
+17. 更新 state.json:
     - `role_map` 添加: `"{ns}:{R-ID}": "{username}:{nickname}@{namespace}"`
     - `commitments` 添加每个声明的 Commitment
 

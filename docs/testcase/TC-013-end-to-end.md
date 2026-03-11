@@ -15,7 +15,7 @@
 - **前置依赖**：无
 - **验证**：模板文件生成
 - **验收标准**：
-  - 输出文件：`simulation/contracts/two-role-submit-approve.socialware.md`
+  - 输出文件：`simulation/socialware/two-role-submit-approve.socialware.md`
   - §1 有 R1(提交者) 和 R2(审批者)，Holder 全为 `_待绑定_`
   - §2 有完整的状态转换表（_none_→submit→submitted, submitted→approve→approved, submitted→reject→rejected, rejected→revise→submitted）
   - §3 有 C1（审批者在规定时间内回复）
@@ -47,16 +47,17 @@
 ### Step 4: 开发并安装 Socialware App
 
 - **操作**：
-  1. 执行 `/socialware-app-dev`：模板=two-role-submit-approve，app-id=da，工具绑定=全部 manual → 产出 `app-store/da.app.md`（状态：已开发）
-  2. 执行 `/socialware-app-install`：App=da，Room=project-e2e，namespace=da，角色绑定=R1→alice:Alice@local, R2→bob:Bob@local → 产出 `contracts/da.app.md`（状态：已安装）
+  1. 执行 `/socialware-app-dev`：模板=two-role-submit-approve，App-ID=`doc-audit.alice.two-role-submit-approve`，工具绑定=全部 manual → 产出 `app-store/doc-audit.alice.two-role-submit-approve.app.md`（状态：已开发），并注册到 `simulation/app-store/registry.json`
+  2. 执行 `/socialware-app-install`：从 registry.json 查询选择 App=`doc-audit.alice.two-role-submit-approve`，Room=project-e2e，namespace=da，角色绑定=R1→alice:Alice@local, R2→bob:Bob@local → 产出 `contracts/doc-audit.alice.two-role-submit-approve.app.md`（状态：已安装）
 - **前置依赖**：Step 1, Step 3
 - **验证**：App 开发并安装成功
 - **验收标准**：
-  - `app-store/da.app.md` 存在（已开发，§5 已填入，§1 Holder 为 `_待绑定_`）
-  - `contracts/da.app.md` 存在（已安装）
+  - `app-store/doc-audit.alice.two-role-submit-approve.app.md` 存在（已开发，§5 已填入，§1 Holder 为 `_待绑定_`）
+  - `simulation/app-store/registry.json` 中已注册该 App
+  - `contracts/doc-audit.alice.two-role-submit-approve.app.md` 存在（已安装）
   - §1 Holder 已填入具体 Identity
   - §5 Tool 已填入（无 `_待实现_`）
-  - `config.json` 的 `socialware.installed` = `[{"app_id": "da", "namespace": "da", "contract": "da.app.md", "template": "two-role-submit-approve.socialware.md"}]`
+  - `config.json` 的 `socialware.installed` = `[{"app_id": "doc-audit.alice.two-role-submit-approve", "namespace": "da", "contract": "doc-audit.alice.two-role-submit-approve.app.md", "template": "two-role-submit-approve.socialware.md"}]`
   - `state.json` 的 `role_map` 有 alice 和 bob 的角色
   - `commitments` 有 `da:C1` 且 status=inactive
 
@@ -145,7 +146,7 @@
 
 ### Step 13: 模板未被修改
 
-- **操作**：读取 `simulation/contracts/two-role-submit-approve.socialware.md`
+- **操作**：读取 `simulation/socialware/two-role-submit-approve.socialware.md`
 - **前置依赖**：Step 4
 - **验证**：模板保持只读
 - **验收标准**：
@@ -163,5 +164,5 @@
   - state.json 符合 state.json schema
   - Timeline Ref 符合 Ref schema
   - Content Object 符合 Content Object schema
-  - da.app.md 符合 .app.md 规范（§1-§6 完整）
+  - doc-audit.alice.two-role-submit-approve.app.md 符合 .app.md 规范（§1-§6 完整）
   - 所有 Identity 文件符合 Identity schema

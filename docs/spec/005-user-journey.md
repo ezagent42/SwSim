@@ -130,7 +130,7 @@ Lamport Clock: 5
 
 ## 3. 设计 Socialware 模板（`/socialware-dev` Skill）
 
-如果 `simulation/contracts/` 中没有合适的模板，用户需要先设计一个。
+如果 `simulation/socialware/` 中没有合适的模板，用户需要先设计一个。
 
 ### 3.1 设计流程
 
@@ -138,7 +138,7 @@ Lamport Clock: 5
 
 **前置条件**：需要身份（由 `/room create` 创建）。
 
-**产出**：`simulation/contracts/{name}.socialware.md`（状态: 模板，§5 全部 `_待实现_`，§1 全部 `_待绑定_`）
+**产出**：`simulation/socialware/{name}.socialware.md`（状态: 模板，§5 全部 `_待实现_`，§1 全部 `_待绑定_`）
 
 **完成后**：下一步用 `/socialware-app-dev` 基于此模板开发 App。
 
@@ -148,10 +148,10 @@ Lamport Clock: 5
 
 ### 4.1 模板目录
 
-所有可用的 Socialware 模板存放在 `simulation/contracts/`：
+所有可用的 Socialware 模板存放在 `simulation/socialware/`：
 
 ```
-simulation/contracts/
+simulation/socialware/
 ├── two-role-submit-approve.socialware.md    ← 双角色提交-审批
 ├── event-weaver.socialware.md               ← 代码协作工作流
 ├── resource-pool.socialware.md              ← 资源管理
@@ -186,12 +186,12 @@ simulation/contracts/
 ```
 选择模板                选择 Namespace         绑定工具                 完成
 ────────               ─────────────         ────────                ────
-从 contracts/ 选模板    选 namespace 前缀      绑定 Tool + 跨契约引用   生成 .app.md 到 app-store
+从 socialware/ 选模板   选 namespace 前缀      绑定 Tool + 跨契约引用   生成 .app.md 到 app-store
 ```
 
 ### 5.2 Step 1 — 选择模板
 
-从 `simulation/contracts/` 中选择一个 `.socialware.md` 模板。
+从 `simulation/socialware/` 中选择一个 `.socialware.md` 模板。
 
 ```
 可用模板:
@@ -237,7 +237,8 @@ Namespace 前缀 (2-4个字符): ta
 
 ### 5.6 Step 5 — 生成文件
 
-- 生成 `workspace/app-store/{app-id}.app.md`（状态：已开发，§1 Holder 仍为 `_待绑定_`）
+- 生成 `workspace/app-store/{AppName}.{DeveloperName}.{SocialwareName}.app.md`（状态：已开发，§1 Holder 仍为 `_待绑定_`）
+- 在 `simulation/app-store/registry.json` 中创建注册条目
 
 ---
 
@@ -248,12 +249,12 @@ Namespace 前缀 (2-4个字符): ta
 ```
 选择 App              选择 Room           绑定 Identity          完成
 ────────             ────────            ──────────            ────
-从 app-store/ 选 App  指定目标 Room        绑定 Identity 到 Role   安装到 Room + 更新 config.json
+从 registry.json 选 App  指定目标 Room     绑定 Identity 到 Role   安装到 Room + 更新 config.json
 ```
 
 ### 6.2 Step 1 — 选择已开发 App
 
-从 `workspace/app-store/` 中选择一个已开发的 `.app.md`。
+从 `workspace/app-store/` 中选择一个已开发的 `.app.md`（通过 `simulation/app-store/registry.json` 查询可用 App）。
 
 ### 6.3 Step 2 — 选择目标 Room
 
@@ -271,7 +272,7 @@ Namespace 前缀 (2-4个字符): ta
 
 ### 6.5 Step 4 — 生成文件
 
-- 生成 `workspace/rooms/{room}/contracts/{app-id}.app.md`（状态：已安装）
+- 生成 `workspace/rooms/{room}/contracts/{AppName}.{DeveloperName}.{SocialwareName}.app.md`（状态：已安装）
 - 更新 `workspace/rooms/{room}/config.json`（添加 namespace 到 `socialware.installed`，添加 role_map）
 
 ---
@@ -507,7 +508,7 @@ Identity: alice:Alice@local
 ```
 步骤:
 1. 关闭当前 session
-2. 编辑 contracts/ta.app.md（修改 Flow 或绑定）
+2. 编辑 contracts/task-arena.alice.two-role-submit-approve.app.md（修改 Flow 或绑定）
 3. 重新启动 /socialware-app
 4. 重放 Timeline → 新逻辑生效
 ```
@@ -601,22 +602,24 @@ Bob> /room join alpha
 ✓ bob:Bob@local 已加入 Room "alpha"
 
 === Step 3: Alice 浏览模板 ===
-Alice> ls simulation/contracts/
+Alice> ls simulation/socialware/
   1. two-role-submit-approve.socialware.md
 
 === Step 4: Alice 开发 Socialware App ===
 Alice> /socialware-app-dev
 模板: two-role-submit-approve.socialware.md
-Namespace: ta
+AppName: task-arena
 工具绑定: 全部 manual
-✓ ta.app.md 已保存到 app-store
+✓ task-arena.alice.two-role-submit-approve.app.md 已保存到 app-store
+✓ registry.json 已更新
 
 === Step 4b: Alice 安装 App 到 Room ===
 Alice> /socialware-app-install
-App: ta.app.md (from app-store)
+App: task-arena.alice.two-role-submit-approve.app.md (from app-store)
 Room: alpha
+Namespace: ta
 角色绑定: R1 → alice:Alice@local, R2 → bob:Bob@local
-✓ ta.app.md 已安装到 Room "alpha"
+✓ task-arena.alice.two-role-submit-approve.app.md 已安装到 Room "alpha"
 
 === Step 5: Alice 运行 App ===
 Alice> /socialware-app

@@ -117,7 +117,7 @@ Room ≠ App。Room 是空间，App 是空间中可运行的指令集。一个 R
 
 Room 创建/加入完成后，根据当前状态提示用户下一步：
 
-- **如果 `simulation/contracts/` 中无模板** → 提示：
+- **如果 `simulation/socialware/` 中无模板** → 提示：
   > Room 已就绪。下一步用 `/socialware-dev` 设计一个 Socialware 模板。
 - **如果有模板但 `simulation/workspace/app-store/` 中无 App** → 提示：
   > Room 已就绪。下一步用 `/socialware-app-dev` 基于模板开发 App。
