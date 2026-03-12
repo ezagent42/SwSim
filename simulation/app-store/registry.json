@@ -1,4 +1,13 @@
 {
-  "version": 1,
-  "apps": {}
+  "apps": {
+    "event-weaver.alice.peer-stewardship": {
+      "app_file": "event-weaver.alice.peer-stewardship.app.md",
+      "app_id": "event-weaver.alice.peer-stewardship",
+      "created_at": "2026-03-12T06:02:01Z",
+      "description": "文件级事件溯源 App——记录一切文件变更事件，权限驱动自动分叉，支持线性与非线性事件消费",
+      "developer": "alice:Alice@local",
+      "socialware": "peer-stewardship"
+    }
+  },
+  "version": 1
 }
